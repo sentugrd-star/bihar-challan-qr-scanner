@@ -17,190 +17,210 @@
       padding: 20px;
     }
 
-    h2 {
+    h1 {
       color: #1b5e20;
+      font-size: 25px;
     }
 
     #reader {
       width: 100%;
       max-width: 450px;
-      margin: auto;
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-    }
-
-    .box {
-      max-width: 450px;
-      margin: 15px auto;
+      margin: 20px auto;
       background: white;
       padding: 15px;
       border-radius: 12px;
     }
 
     input {
-      width: 95%;
+      width: 90%;
+      max-width: 500px;
       padding: 12px;
       font-size: 15px;
-      margin: 8px 0;
+      margin: 10px;
       box-sizing: border-box;
     }
 
     button {
-      padding: 12px 20px;
+      padding: 12px 25px;
+      font-size: 16px;
       background: #1b5e20;
       color: white;
       border: none;
       border-radius: 6px;
-      font-size: 16px;
       cursor: pointer;
     }
 
+    button:hover {
+      background: #2e7d32;
+    }
+
+    #result {
+      max-width: 600px;
+      margin: 15px auto;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      word-break: break-all;
+    }
+
     #status {
-      margin-top: 15px;
       font-weight: bold;
+      margin: 15px;
+    }
+
+    iframe {
+      display: none;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>🚚 Bihar Sand Challan</h2>
+  <h1>🚚 Bihar Sand Challan</h1>
   <p>QR Code Scan Kijiye</p>
 
   <div id="reader"></div>
 
-  <div class="box">
-
-    <input
-      type="text"
-      id="urlInput"
-      placeholder="QR URL yahan bhi paste kar sakte hain"
-    >
-
-    <br>
-
-    <button onclick="submitURL()">
-      Submit URL
-    </button>
-
-    <div id="status"></div>
-
+  <div id="status">
+    Camera start ho raha hai...
   </div>
 
-  <script>
+  <div id="result">
+    QR scan hone ke baad URL yahan dikhega.
+  </div>
 
-    // ==========================================
-    // APPS SCRIPT WEB APP URL
-    // ==========================================
+  <input
+    type="text"
+    id="manualUrl"
+    placeholder="QR URL yahan bhi paste kar sakte hain"
+  >
 
-    const APPS_SCRIPT_URL =
-      "YAHAN_APPS_SCRIPT_WEB_APP_URL_PASTE_KARE";
+  <br>
+
+  <button onclick="submitManual()">
+    Submit URL
+  </button>
+
+  <!-- Google Apps Script ko background mein request bhejne ke liye -->
+  <iframe name="sheetFrame"></iframe>
+
+  <form
+    id="sheetForm"
+    method="GET"
+    target="sheetFrame"
+    style="display:none;"
+  >
+    <input type="hidden" name="url" id="sheetUrl">
+  </form>
 
 
-    // ==========================================
-    // QR SCAN SUCCESS
-    // ==========================================
+<script>
 
-    function onScanSuccess(decodedText, decodedResult) {
+  /*
+    IMPORTANT:
+    Ye aapka Google Apps Script Web App URL hai.
+  */
+  const APPS_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNIGvq3Vx7SHSree91OR0BICZU5TBN/exec";
 
-      document.getElementById("urlInput").value = decodedText;
 
-      document.getElementById("status").innerHTML =
-        "✅ QR Scan ho gaya. Google Sheet me bhej rahe hain...";
+  let alreadyScanned = false;
 
-      sendToGoogleSheet(decodedText);
+
+  function onScanSuccess(decodedText, decodedResult) {
+
+    if (alreadyScanned) {
+      return;
     }
 
+    alreadyScanned = true;
 
-    // ==========================================
-    // SEND URL TO APPS SCRIPT
-    // ==========================================
+    document.getElementById("status").innerText =
+      "✅ QR Scan Successful";
 
-    function sendToGoogleSheet(url) {
+    document.getElementById("result").innerText =
+      decodedText;
 
-      if (!url) {
-        alert("QR URL nahi mila.");
-        return;
-      }
+    saveToGoogleSheet(decodedText);
 
-      if (
-        APPS_SCRIPT_URL ===
-        "YAHAN_APPS_SCRIPT_WEB_APP_URL_PASTE_KARE"
-      ) {
-        alert("Pehle Apps Script Web App URL paste kijiye.");
-        return;
-      }
-
-      const finalURL =
-        APPS_SCRIPT_URL +
-        "?url=" +
-        encodeURIComponent(url);
-
-      // Hidden iframe - CORS problem nahi hogi
-      const iframe = document.createElement("iframe");
-
-      iframe.style.display = "none";
-      iframe.src = finalURL;
-
-      document.body.appendChild(iframe);
-
-      setTimeout(function () {
-
-        document.getElementById("status").innerHTML =
-          "✅ Challan Google Sheet me save ho gaya.";
-
-      }, 2000);
-    }
+    setTimeout(function() {
+      alreadyScanned = false;
+    }, 3000);
+  }
 
 
-    // ==========================================
-    // MANUAL URL SUBMIT
-    // ==========================================
-
-    function submitURL() {
-
-      const url =
-        document.getElementById("urlInput").value.trim();
-
-      if (!url) {
-        alert("QR URL enter kijiye.");
-        return;
-      }
-
-      document.getElementById("status").innerHTML =
-        "⏳ Google Sheet me save ho raha hai...";
-
-      sendToGoogleSheet(url);
-    }
+  function onScanFailure(error) {
+    // Normal scanning errors ko ignore karein
+  }
 
 
-    // ==========================================
-    // START CAMERA
-    // ==========================================
+  function startScanner() {
 
-    const scanner =
-      new Html5QrcodeScanner(
-        "reader",
-        {
-          fps: 10,
-          qrbox: {
-            width: 250,
-            height: 250
-          },
-          rememberLastUsedCamera: true
-        },
-        false
-      );
+    const html5QrCode = new Html5Qrcode("reader");
 
-    scanner.render(
+    html5QrCode.start(
+      { facingMode: "environment" },
+
+      {
+        fps: 10,
+        qrbox: {
+          width: 250,
+          height: 250
+        }
+      },
+
       onScanSuccess,
-      function(errorMessage) {
-        // normal scanning errors ignore
-      }
-    );
+      onScanFailure
 
-  </script>
+    ).then(function() {
+
+      document.getElementById("status").innerText =
+        "📷 Camera Ready — QR Code Scan Kijiye";
+
+    }).catch(function(error) {
+
+      document.getElementById("status").innerText =
+        "❌ Camera Permission/Error: " + error;
+
+    });
+  }
+
+
+  function saveToGoogleSheet(url) {
+
+    document.getElementById("sheetUrl").value = url;
+
+    document.getElementById("sheetForm").action =
+      APPS_SCRIPT_URL;
+
+    document.getElementById("sheetForm").submit();
+
+    document.getElementById("status").innerText =
+      "✅ QR Saved to Google Sheet";
+  }
+
+
+  function submitManual() {
+
+    const url =
+      document.getElementById("manualUrl").value.trim();
+
+    if (!url) {
+      alert("Please QR URL enter karein.");
+      return;
+    }
+
+    document.getElementById("result").innerText = url;
+
+    saveToGoogleSheet(url);
+  }
+
+
+  window.onload = function() {
+    startScanner();
+  };
+
+</script>
 
 </body>
 </html>
