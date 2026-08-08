@@ -536,93 +536,212 @@ function vibrate(){
    GOOGLE SHEET SAVE
 ===================================================== */
 
-function saveToGoogleSheet(value){
+// =====================================================
+// GOOGLE SHEET QUEUE - NO QR ENTRY LOST
+// =====================================================
 
-    if(!value) return;
+const SAVE_QUEUE_KEY = "bihar_qr_save_queue";
 
-    const url =
-        APPS_SCRIPT_URL +
-        "?url=" +
-        encodeURIComponent(value);
+let saveQueue = [];
+let savingNow = false;
 
-    /*
-       Google Apps Script ko request
-       invisible image se bhej rahe hain.
-    */
+// Load pending data
+try {
+    saveQueue =
+        JSON.parse(
+            localStorage.getItem(SAVE_QUEUE_KEY) || "[]"
+        );
+} catch (e) {
+    saveQueue = [];
+}
 
-    const img =
-        document.createElement("img");
 
-    img.style.display =
-        "none";
+// Save queue
+function saveQueueToStorage() {
 
-    img.src =
-        url;
+    try {
 
-    document.body.appendChild(
-        img
-    );
+        localStorage.setItem(
+            SAVE_QUEUE_KEY,
+            JSON.stringify(saveQueue)
+        );
 
-    setTimeout(function(){
-
-        try{
-            img.remove();
-        }catch(e){}
-
-    },5000);
+    } catch (e) {}
 
 }
 
 
+// Add QR to queue
+function saveToGoogleSheet(value) {
+
+    if (!value) {
+        return;
+    }
+
+    saveQueue.push({
+        url: value,
+        time: Date.now()
+    });
+
+    saveQueueToStorage();
+
+    processSaveQueue();
+
+}
+
+
+// Process ONE QR at a time
+function processSaveQueue() {
+
+    if (savingNow) {
+        return;
+    }
+
+    if (saveQueue.length === 0) {
+        return;
+    }
+
+    savingNow = true;
+
+    const item = saveQueue[0];
+
+    const requestURL =
+        APPS_SCRIPT_URL +
+        "?url=" +
+        encodeURIComponent(item.url);
+
+    const img =
+        new Image();
+
+    let finished = false;
+
+    function finish() {
+
+        if (finished) {
+            return;
+        }
+
+        finished = true;
+
+        img.onload = null;
+        img.onerror = null;
+
+        // Remove saved item
+        saveQueue.shift();
+
+        saveQueueToStorage();
+
+        savingNow = false;
+
+        // Small gap before next QR
+        setTimeout(
+            processSaveQueue,
+            250
+        );
+
+    }
+
+    img.onload = function () {
+
+        finish();
+
+    };
+
+    img.onerror = function () {
+
+        // Google Apps Script redirect/network
+        // can sometimes trigger onerror even when request
+        // reaches the server. Retry after delay.
+
+        savingNow = false;
+
+        setTimeout(
+            processSaveQueue,
+            1500
+        );
+
+    };
+
+    img.src =
+        requestURL;
+
+    // Safety timeout
+    setTimeout(
+        function () {
+
+            if (!finished) {
+
+                finish();
+
+            }
+
+        },
+        5000
+    );
+
+}
+
+
+// Retry pending QR when page opens
+window.addEventListener(
+    "load",
+    function () {
+
+        setTimeout(
+            processSaveQueue,
+            1000
+        );
+
+    }
+);
+      
 /* =====================================================
    QR SUCCESS
 ===================================================== */
 
-function onQRSuccess(result){
+function onQRSuccess(result) {
 
-    if(!result) return;
-
-    const text =
-        typeof result === "string"
-        ? result
-        : result.text;
-
-    if(!text) return;
-
-    if(scanLocked) return;
-
-    const now =
-        Date.now();
-
-    /*
-       Same QR ko 5 sec ke andar
-       dobara save nahi karega.
-    */
-
-    if(
-        text === lastQR &&
-        now - lastScanTime < 5000
-    ){
-
+    if (!result || !result.text) {
         return;
-
     }
 
-    scanLocked = true;
+    const text =
+        result.text.trim();
 
-    lastQR =
-        text;
+    if (!text) {
+        return;
+    }
 
-    lastScanTime =
-        now;
+    // Same QR को दोबारा तुरंत scan होने से रोकें
+    if (text === lastScannedText) {
+        return;
+    }
 
+    lastScannedText = text;
+
+    // Result दिखाएँ
+    showResult(text);
+
+    // Sound
     beep();
 
+    // Vibration
     vibrate();
 
-    showResult(
-        text
+    // Google Sheet Queue
+    saveToGoogleSheet(text);
+
+    // 1.5 sec बाद next QR allow
+    setTimeout(
+        function () {
+
+            lastScannedText = "";
+
+        },
+        1500
     );
+
+}
 
     setStatus(
         "✅ QR Scan Successful — Google Sheet me save ho raha hai.",
