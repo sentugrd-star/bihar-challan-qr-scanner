@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bihar QR Scanner</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQmloYXIgUVIgU2Nhbm5lciIsInNob3J0X25hbWUiOiJRUiBTY2FubmVyIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjE3MmEiLCJ0aGVtZV9jb2xvciI6IiMxZTQwYWYifQ==">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, Segoe UI, Roboto, sans-serif; }
+  body {
+    background: linear-gradient(135deg,#0f172a,#1e293b);
+    color:#f1f5f9;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px;
+  }
+  header { text-align:center; margin:10px 0 20px; }
+  header h1 { font-size:1.3rem; color:#60a5fa; }
+  header p { font-size:0.8rem; color:#94a3b8; margin-top:4px; }
+
+  #reader {
+    width:100%;
+    max-width:420px;
+    border-radius:16px;
+    overflow:hidden;
+    border:2px solid #334155;
+    box-shadow:0 0 30px rgba(59,130,246,0.15);
+  }
+
+  .status-box {
+    width:100%;
+    max-width:420px;
+    margin-top:16px;
+    padding:14px 16px;
+    border-radius:12px;
+    background:#1e293b;
+    border:1px solid #334155;
+    font-size:0.9rem;
+    min-height:50px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    word-break:break-all;
+  }
+  .status-box.success { border-color:#22c55e; background:#052e16; color:#86efac; }
+  .status-box.error { border-color:#ef4444; background:#3f0d0d; color:#fca5a5; }
+  .status-box.loading { border-color:#f59e0b; background:#3f2d0d; color:#fcd34d; }
+
+  .spinner {
+    width:16px; height:16px;
+    border:2px solid #fcd34d;
+    border-top-color:transparent;
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+    flex-shrink:0;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .log {
+    width:100%;
+    max-width:420px;
+    margin-top:16px;
+  }
+  .log h3 { font-size:0.85rem; color:#94a3b8; margin-bottom:8px; }
+  .log-item {
+    background:#1e293b;
+    border:1px solid #334155;
+    border-radius:10px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    font-size:0.78rem;
+  }
+  .log-item .url { color:#60a5fa; word-break:break-all; display:block; margin-bottom:4px; }
+  .log-item .time { color:#64748b; }
+
+  button.pause-btn {
+    margin-top:14px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:10px;
+    font-size:0.9rem;
+    width:100%;
+    max-width:420px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📷 Bihar QR Scanner</h1>
+  <p>Chalan QR scan karo — auto Google Sheet me add hoga</p>
+</header>
+
+<div id="reader"></div>
+
+<div id="status" class="status-box">Camera start ho raha hai...</div>
+
+<button class="pause-btn" id="toggleBtn">⏸ Pause Scanner</button>
+
+<div class="log">
+  <h3>Recent Scans</h3>
+  <div id="logList"></div>
+</div>
+
+<script>
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNlGvq3Vx7SHSree91OR0BiCZU5TBN/exec";
+
+const statusBox = document.getElementById('status');
+const logList = document.getElementById('logList');
+const toggleBtn = document.getElementById('toggleBtn');
+
+let lastScanned = "";
+let lastScanTime = 0;
+let isPaused = false;
+
+function setStatus(type, msg) {
+  statusBox.className = "status-box " + type;
+  statusBox.innerHTML = type === "loading"
+    ? '<div class="spinner"></div><span>' + msg + '</span>'
+    : msg;
+}
+
+function addLog(url, ok) {
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  const time = new Date().toLocaleTimeString('en-IN');
+  item.innerHTML = '<span class="url">' + (ok ? '✅ ' : '❌ ') + url + '</span><span class="time">' + time + '</span>';
+  logList.prepend(item);
+}
+
+async function sendToSheet(qrUri) {
+  setStatus("loading", "Sheet me add ho raha hai...");
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ qrUri: qrUri })
+    });
+    // no-cors se response nahi padh sakte, isliye success maan lete hain
+    setStatus("success", "✅ Sheet me add ho gaya!");
+    addLog(qrUri, true);
+    if (navigator.vibrate) navigator.vibrate(150);
+  } catch (err) {
+    setStatus("error", "❌ Error: " + err.message);
+    addLog(qrUri, false);
+  }
+}
+
+function onScanSuccess(decodedText) {
+  const now = Date.now();
+  // duplicate scan ko 4 second ke andar dobara mat bhejo
+  if (decodedText === lastScanned && (now - lastScanTime) < 4000) return;
+  lastScanned = decodedText;
+  lastScanTime = now;
+  sendToSheet(decodedText);
+}
+
+const html5QrCode = new Html5Qrcode("reader");
+const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+function startScanner() {
+  html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+    .then(() => setStatus("loading", "Scanner ready — QR code ko frame me lao"))
+    .catch(err => setStatus("error", "Camera error: " + err));
+}
+
+toggleBtn.addEventListener('click', () => {
+  if (!isPaused) {
+    html5QrCode.pause(true);
+    toggleBtn.textContent = "▶ Resume Scanner";
+    setStatus("loading", "Scanner paused");
+  } else {
+    html5QrCode.resume();
+    toggleBtn.textContent = "⏸ Pause Scanner";
+    setStatus("loading", "Scanner resumed");
+  }
+  isPaused = !isPaused;
+});
+
+startScanner();
+</script>
+
+</body>
+</html>
