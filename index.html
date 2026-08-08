@@ -162,7 +162,7 @@ const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNlGvq3Vx7SHSree91OR0BiCZU5TBN/exec";
 
 
-let scanner = null;
+let html5QrCode = null;
 let scanningLocked = false;
 
 
@@ -301,49 +301,59 @@ function onScanSuccess(decodedText){
             "📷 Next QR Code scan kijiye..."
         );
 
-    },3000);
+    },1500);
 }
 
 
 /* ==========================================
-   CAMERA SCAN
+   CAMERA SCAN (FAST - direct Html5Qrcode API)
    ========================================== */
 
 function startCamera(){
 
-    scanner =
-        new Html5QrcodeScanner(
-            "reader",
-            {
-                fps:15,
-
-                qrbox:{
-                    width:280,
-                    height:280
-                },
-
-                rememberLastUsedCamera:true,
-
-                supportedScanTypes:[
-                    Html5QrcodeScanType.SCAN_TYPE_CAMERA,
-                    Html5QrcodeScanType.SCAN_TYPE_FILE
-                ]
-            },
-            false
-        );
-
-
-    scanner.render(
-        onScanSuccess,
-        function(error){
-            // Normal scan errors ignore
+    html5QrCode = new Html5Qrcode(
+        "reader",
+        {
+            formatsToSupport:[
+                Html5QrcodeSupportedFormats.QR_CODE
+            ],
+            verbose:false
         }
     );
 
+    const config = {
+        fps:20,
+        qrbox:{
+            width:250,
+            height:250
+        },
+        aspectRatio:1.0,
+        disableFlip:true
+    };
 
-    setStatus(
-        "📷 Camera Ready — QR ko box ke andar rakhein."
-    );
+    html5QrCode.start(
+        { facingMode:"environment" },
+        config,
+        onScanSuccess,
+        function(errorMessage){
+            // per-frame scan miss, ignore silently
+        }
+    )
+    .then(function(){
+
+        setStatus(
+            "📷 Camera Ready — QR ko box ke andar rakhein."
+        );
+
+    })
+    .catch(function(err){
+
+        setStatus(
+            "❌ Camera start nahi hui: " + err,
+            "error"
+        );
+
+    });
 }
 
 
@@ -371,15 +381,23 @@ document
 
 
         const imageScanner =
-            new Html5Qrcode("reader");
+            new Html5Qrcode("qr-file-reader-temp", {
+                formatsToSupport:[
+                    Html5QrcodeSupportedFormats.QR_CODE
+                ],
+                verbose:false
+            });
 
 
         imageScanner
-        .scanFile(
+        .scanFileV2(
             file,
-            true
+            false
         )
-        .then(function(decodedText){
+        .then(function(result){
+
+            const decodedText =
+                result.decodedText;
 
             showResult(decodedText);
 
@@ -459,6 +477,12 @@ function manualSubmit(){
 
 window.onload =
     function(){
+
+        // hidden temp div required by html5-qrcode for file scanning
+        const tempDiv = document.createElement("div");
+        tempDiv.id = "qr-file-reader-temp";
+        tempDiv.style.display = "none";
+        document.body.appendChild(tempDiv);
 
         startCamera();
 
