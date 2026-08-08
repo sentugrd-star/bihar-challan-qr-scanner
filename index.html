@@ -1,1590 +1,556 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="hi">
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Bihar Sand Challan QR Scanner</title>
 
-<!-- QR SCANNER LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-
 <style>
-
-/* ==============================
-   BASIC
-============================== */
-
-*{
-    box-sizing:border-box;
-}
-
+*{box-sizing:border-box}
 body{
-    margin:0;
-    padding:12px;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f3f5f4;
-    color:#222;
+  margin:0;padding:12px;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f3f5f4;color:#222
 }
-
-.container{
-    width:100%;
-    max-width:650px;
-    margin:auto;
-}
-
-
-/* ==============================
-   HEADER
-============================== */
-
-.header{
-    text-align:center;
-    margin-bottom:10px;
-}
-
-.header h1{
-    margin:5px 0;
-    color:#176b3a;
-    font-size:25px;
-}
-
-.header p{
-    margin:5px 0;
-    color:#555;
-}
-
-
-/* ==============================
-   CAMERA BOX
-============================== */
+.container{width:100%;max-width:650px;margin:auto}
+.header{text-align:center;margin-bottom:10px}
+.header h1{margin:5px 0;color:#176b3a;font-size:25px}
+.header p{margin:5px 0;color:#555}
 
 .camera-card{
-    background:#000;
-    border-radius:15px;
-    overflow:hidden;
-    position:relative;
-    box-shadow:0 3px 12px rgba(0,0,0,.15);
+  background:#000;border-radius:15px;overflow:hidden;
+  position:relative;box-shadow:0 3px 12px rgba(0,0,0,.15)
 }
-
-#reader{
-    width:100%;
-    min-height:320px;
-}
-
-
-/* ==============================
-   STATUS
-============================== */
+#reader{width:100%;min-height:320px}
+#reader video{width:100%!important;height:auto!important;object-fit:cover}
 
 .status{
-    margin:12px 0;
-    padding:13px;
-    border-radius:9px;
-    background:#e9eceb;
-    text-align:center;
-    font-weight:bold;
+  margin:12px 0;padding:13px;border-radius:9px;
+  background:#e9eceb;text-align:center;font-weight:bold
 }
-
-.status.success{
-    background:#d8f5df;
-    color:#126b2d;
-}
-
-.status.error{
-    background:#ffe0e0;
-    color:#a00000;
-}
-
-.status.warning{
-    background:#fff2cc;
-    color:#795900;
-}
-
-
-/* ==============================
-   BUTTONS
-============================== */
+.status.success{background:#d8f5df;color:#126b2d}
+.status.error{background:#ffe0e0;color:#a00000}
+.status.warning{background:#fff2cc;color:#795900}
 
 .controls{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:8px;
-    margin:10px 0;
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:8px;margin:10px 0
 }
-
 button{
-    border:0;
-    border-radius:8px;
-    padding:12px 17px;
-    background:#176b3a;
-    color:white;
-    font-size:15px;
-    cursor:pointer;
+  border:0;border-radius:8px;padding:12px 17px;
+  background:#176b3a;color:white;font-size:15px;cursor:pointer
 }
+button:active{transform:scale(.97)}
+button.secondary{background:#555}
+button.danger{background:#a00000}
+button:disabled{opacity:.5}
 
-button:active{
-    transform:scale(.97);
+.option-card,.result-card{
+  background:white;padding:15px;margin-top:15px;
+  border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)
 }
-
-button.secondary{
-    background:#555;
-}
-
-button.danger{
-    background:#a00000;
-}
-
-button:disabled{
-    opacity:.5;
-}
-
-
-/* ==============================
-   RESULT
-============================== */
-
-.result-card{
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    margin-top:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.result-title{
-    font-weight:bold;
-    color:#176b3a;
-    margin-bottom:8px;
-}
-
-#result{
-    word-break:break-all;
-    font-size:14px;
-    line-height:1.5;
-}
-
+.result-title{font-weight:bold;color:#176b3a;margin-bottom:8px}
+#result{word-break:break-all;font-size:14px;line-height:1.5}
 .open-link{
-    display:inline-block;
-    margin-top:12px;
-    padding:10px 15px;
-    background:#176b3a;
-    color:white;
-    text-decoration:none;
-    border-radius:7px;
+  display:inline-block;margin-top:12px;padding:10px 15px;
+  background:#176b3a;color:white;text-decoration:none;border-radius:7px
 }
-
-
-/* ==============================
-   OTHER OPTIONS
-============================== */
-
-.option-card{
-    background:white;
-    padding:15px;
-    margin-top:15px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
+input[type=text]{
+  width:100%;padding:13px;border:1px solid #aaa;
+  border-radius:7px;font-size:16px;outline:none
 }
-
-.option-card h3{
-    margin-top:0;
-}
-
-input[type="text"]{
-    width:100%;
-    padding:13px;
-    border:1px solid #aaa;
-    border-radius:7px;
-    font-size:16px;
-    outline:none;
-}
-
-input[type="text"]:focus{
-    border-color:#176b3a;
-}
-
-input[type="file"]{
-    width:100%;
-    padding:10px 0;
-}
-
-
-/* ==============================
-   CAMERA SELECT
-============================== */
-
+input[type=text]:focus{border-color:#176b3a}
+input[type=file]{width:100%;padding:10px 0}
 #cameraSelect{
-    width:100%;
-    padding:11px;
-    border-radius:7px;
-    border:1px solid #aaa;
-    background:white;
-    margin-top:8px;
+  width:100%;padding:11px;border-radius:7px;
+  border:1px solid #aaa;background:white;margin-top:8px
 }
-
-
-/* ==============================
-   SMALL TEXT
-============================== */
-
-.small{
-    text-align:center;
-    color:#777;
-    font-size:12px;
-    margin:18px 0;
-}
-
+.small{text-align:center;color:#777;font-size:12px;margin:18px 0}
+.hint{text-align:center;color:#555;font-size:13px;margin:8px 0}
 </style>
-
 </head>
 
-
 <body>
-
-
 <div class="container">
 
+  <div class="header">
+    <h1>🚚 Bihar Sand Challan</h1>
+    <p>📷 Fast QR Code Scanner</p>
+  </div>
 
-<!-- ==============================
-     HEADER
-============================== -->
+  <div class="camera-card">
+    <div id="reader"></div>
+  </div>
 
-<div class="header">
+  <div id="status" class="status">
+    📷 Camera start ho raha hai...
+  </div>
 
-<h1>🚚 Bihar Sand Challan</h1>
+  <div class="hint">
+    QR ko box ke beech mein rakhein • 15–30 cm distance rakhein
+  </div>
 
-<p>📷 QR Code Scan Kijiye</p>
+  <div class="controls">
+    <button id="startBtn" onclick="startScanner()">▶️ Start Camera</button>
+    <button id="stopBtn" class="danger" onclick="stopScanner()">⏹️ Stop</button>
+    <button id="torchBtn" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch ON</button>
+  </div>
 
+  <div class="option-card">
+    <b>📷 Camera</b>
+    <select id="cameraSelect">
+      <option value="">Camera select karein</option>
+    </select>
+  </div>
+
+  <div class="result-card">
+    <div class="result-title">✅ Scan Result</div>
+    <div id="result">QR scan hone ke baad URL yahan dikhega.</div>
+  </div>
+
+  <div class="option-card">
+    <h3>🖼️ QR Photo Se Scan</h3>
+    <p>QR ki clear photo select karein.</p>
+    <input type="file" id="qrImage" accept="image/*">
+  </div>
+
+  <div class="option-card">
+    <h3>🔗 Manual URL</h3>
+    <input type="text" id="manualUrl" placeholder="QR URL yahan paste karein">
+    <div class="controls">
+      <button onclick="manualSubmit()">Submit URL</button>
+    </div>
+  </div>
+
+  <div class="small">Bihar Sand Challan QR Scanner</div>
 </div>
-
-
-<!-- ==============================
-     CAMERA
-============================== -->
-
-<div class="camera-card">
-
-<div id="reader"></div>
-
-</div>
-
-
-<!-- ==============================
-     STATUS
-============================== -->
-
-<div
-    id="status"
-    class="status"
->
-📷 Camera start ho raha hai...
-</div>
-
-
-<!-- ==============================
-     CAMERA CONTROLS
-============================== -->
-
-<div class="controls">
-
-<button
-    id="startBtn"
-    onclick="startScanner()"
->
-▶️ Start Camera
-</button>
-
-<button
-    id="stopBtn"
-    class="danger"
-    onclick="stopScanner()"
->
-⏹️ Stop
-</button>
-
-<button
-    id="torchBtn"
-    class="secondary"
-    onclick="toggleTorch()"
-    style="display:none"
->
-🔦 Torch
-</button>
-
-</div>
-
-
-<!-- ==============================
-     CAMERA SELECT
-============================== -->
-
-<div class="option-card">
-
-<b>📷 Camera</b>
-
-<select
-    id="cameraSelect"
-    onchange="changeCamera()"
->
-<option value="">
-Camera select karein
-</option>
-</select>
-
-</div>
-
-
-<!-- ==============================
-     RESULT
-============================== -->
-
-<div class="result-card">
-
-<div class="result-title">
-✅ Scan Result
-</div>
-
-<div id="result">
-QR scan hone ke baad URL yahan dikhega.
-</div>
-
-</div>
-
-
-<!-- ==============================
-     PHOTO SCAN
-============================== -->
-
-<div class="option-card">
-
-<h3>🖼️ QR Photo Se Scan</h3>
-
-<p>
-QR ki clear photo select karein.
-</p>
-
-<input
-    type="file"
-    id="qrImage"
-    accept="image/*"
->
-
-</div>
-
-
-<!-- ==============================
-     MANUAL URL
-============================== -->
-
-<div class="option-card">
-
-<h3>🔗 Manual URL</h3>
-
-<input
-    type="text"
-    id="manualUrl"
-    placeholder="QR URL yahan paste karein"
->
-
-<div class="controls">
-
-<button onclick="manualSubmit()">
-Submit URL
-</button>
-
-</div>
-
-</div>
-
-
-<div class="small">
-Bihar Sand Challan QR Scanner
-</div>
-
-
-</div>
-
 
 <script>
-
-
-/* =====================================================
-   GOOGLE APPS SCRIPT URL
-   ===================================================== */
-
+/* =========================================================
+   GOOGLE APPS SCRIPT WEB APP URL
+   ========================================================= */
 const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNIGvq3Vx7SHSree91OR0BICZU5TBN/exec";
 
-
-/* =====================================================
-   GLOBAL VARIABLES
-   ===================================================== */
-
-let html5QrCode = null;
-
+/* =========================================================
+   GLOBALS
+   ========================================================= */
+let scanner = null;
 let cameras = [];
-
-let currentCameraId = null;
-
+let currentCameraId = "";
 let scannerRunning = false;
-
 let scanLocked = false;
-
 let lastScannedText = "";
-
 let torchOn = false;
 
+const statusBox = document.getElementById("status");
+const resultBox = document.getElementById("result");
+const cameraSelect = document.getElementById("cameraSelect");
+const startButton = document.getElementById("startBtn");
+const stopButton = document.getElementById("stopBtn");
+const torchButton = document.getElementById("torchBtn");
 
-/* =====================================================
-   DOM
-   ===================================================== */
-
-const statusBox =
-    document.getElementById("status");
-
-const resultBox =
-    document.getElementById("result");
-
-const cameraSelect =
-    document.getElementById("cameraSelect");
-
-const startButton =
-    document.getElementById("startBtn");
-
-const stopButton =
-    document.getElementById("stopBtn");
-
-const torchButton =
-    document.getElementById("torchBtn");
-
-
-/* =====================================================
-   STATUS
-   ===================================================== */
-
-function setStatus(
-    message,
-    type=""
-){
-
-    statusBox.className =
-        "status";
-
-    if(type){
-        statusBox.classList.add(type);
-    }
-
-    statusBox.innerText =
-        message;
+function setStatus(message,type=""){
+  statusBox.className = "status" + (type ? " " + type : "");
+  statusBox.innerText = message;
 }
-
-
-/* =====================================================
-   RESULT
-   ===================================================== */
-
-function showResult(url){
-
-    let html =
-        "<b>QR Data:</b><br><br>" +
-        escapeHTML(url);
-
-
-    /*
-       Agar QR data URL hai,
-       to OPEN button dikhao.
-    */
-
-    if(
-        url.startsWith("http://") ||
-        url.startsWith("https://")
-    ){
-
-        html +=
-            "<br><br>" +
-            "<a class='open-link' " +
-            "href='" +
-            encodeURI(url) +
-            "' target='_blank'>" +
-            "🔗 Open QR Link" +
-            "</a>";
-    }
-
-
-    resultBox.innerHTML =
-        html;
-}
-
-
-/* =====================================================
-   HTML ESCAPE
-   ===================================================== */
 
 function escapeHTML(text){
-
-    return String(text)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+  return String(text)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
+function showResult(text){
+  let html = "<b>QR Data:</b><br><br>" + escapeHTML(text);
 
-/* =====================================================
-   BEEP
-   ===================================================== */
+  if(/^https?:\/\//i.test(text)){
+    html += "<br><br><a class='open-link' href='" +
+      encodeURI(text) +
+      "' target='_blank' rel='noopener'>🔗 Open QR Link</a>";
+  }
+  resultBox.innerHTML = html;
+}
 
 function beep(){
-
-    try{
-
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        const audio =
-            new AudioContext();
-
-        const oscillator =
-            audio.createOscillator();
-
-        const gain =
-            audio.createGain();
-
-        oscillator.frequency.value =
-            900;
-
-        oscillator.type =
-            "sine";
-
-        gain.gain.value =
-            0.08;
-
-        oscillator.connect(gain);
-
-        gain.connect(audio.destination);
-
-        oscillator.start();
-
-        oscillator.stop(
-            audio.currentTime + 0.12
-        );
-
-    }catch(e){
-
-        console.log(
-            "Beep unavailable"
-        );
-    }
-
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    const audio = new AC();
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.frequency.value = 1000;
+    gain.gain.value = 0.08;
+    osc.connect(gain);
+    gain.connect(audio.destination);
+    osc.start();
+    osc.stop(audio.currentTime + 0.10);
+  }catch(e){}
 }
-
-
-/* =====================================================
-   VIBRATION
-   ===================================================== */
 
 function vibrate(){
-
-    if(
-        navigator.vibrate
-    ){
-
-        navigator.vibrate(
-            [100,50,100]
-        );
-
-    }
-
+  try{
+    if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  }catch(e){}
 }
 
-
-/* =====================================================
+/* =========================================================
    SAVE TO GOOGLE SHEET
-   ===================================================== */
+   ========================================================= */
+function saveToGoogleSheet(value){
+  if(!value) return;
 
-function saveToGoogleSheet(url){
+  const finalURL =
+    APPS_SCRIPT_URL + "?url=" + encodeURIComponent(value);
 
-    if(!url){
+  const img = document.createElement("img");
+  img.style.display = "none";
+  img.src = finalURL;
+  document.body.appendChild(img);
 
-        return;
-    }
-
-
-    /*
-       IMPORTANT:
-       Apps Script URL unchanged.
-    */
-
-    const finalURL =
-        APPS_SCRIPT_URL +
-        "?url=" +
-        encodeURIComponent(url);
-
-
-    /*
-       Hidden iframe.
-       No CORS issue.
-    */
-
-    const iframe =
-        document.createElement("iframe");
-
-
-    iframe.style.display =
-        "none";
-
-
-    iframe.src =
-        finalURL;
-
-
-    document.body.appendChild(
-        iframe
-    );
-
-
-    setTimeout(
-        function(){
-
-            iframe.remove();
-
-        },
-        5000
-    );
-
+  setTimeout(() => {
+    try{ img.remove(); }catch(e){}
+  },5000);
 }
 
-
-/* =====================================================
+/* =========================================================
    QR SUCCESS
-   ===================================================== */
+   ========================================================= */
+function onScanSuccess(decodedText){
+  if(!decodedText || scanLocked) return;
 
-function onScanSuccess(
-    decodedText,
-    decodedResult
-){
+  // Same QR ko baar-baar save na karein
+  if(decodedText === lastScannedText && scanLocked) return;
 
-    if(
-        !decodedText
-    ){
+  scanLocked = true;
+  lastScannedText = decodedText;
 
-        return;
-    }
+  beep();
+  vibrate();
+  showResult(decodedText);
 
+  setStatus(
+    "✅ QR Scan Successful — Google Sheet me save ho raha hai...",
+    "success"
+  );
 
-    /*
-       Duplicate protection.
-    */
+  saveToGoogleSheet(decodedText);
 
-    if(scanLocked){
-
-        return;
-    }
-
-
-    scanLocked =
-        true;
-
-
-    lastScannedText =
-        decodedText;
-
-
-    /*
-       Success sound.
-    */
-
-    beep();
-
-
-    /*
-       Vibration.
-    */
-
-    vibrate();
-
-
-    /*
-       Show result.
-    */
-
-    showResult(
-        decodedText
-    );
-
-
-    /*
-       Status.
-    */
-
-    setStatus(
-        "✅ QR Scan Successful — Google Sheet me save ho raha hai...",
-        "success"
-    );
-
-
-    /*
-       Google Sheet.
-    */
-
-    saveToGoogleSheet(
-        decodedText
-    );
-
-
-    /*
-       2 second lock.
-    */
-
-    setTimeout(
-        function(){
-
-            scanLocked =
-                false;
-
-
-            setStatus(
-                "📷 Next QR Code scan kijiye..."
-            );
-
-        },
-        2000
-    );
-
+  // Scanner ko stop nahi karte; continuous scanning chalta rahega
+  setTimeout(() => {
+    scanLocked = false;
+    setStatus("📷 Next QR Code scan kijiye...");
+  },1200);
 }
 
-
-/* =====================================================
-   SCAN ERROR
-   ===================================================== */
-
-function onScanFailure(
-    errorMessage
-){
-
-    /*
-       Normal scan failures
-       continuously occur.
-       Isliye UI me nahi dikhate.
-    */
-
+function onScanFailure(errorMessage){
+  // Normal: QR na milne par continuously errors aate hain.
 }
 
-
-/* =====================================================
-   GET CAMERAS
-   ===================================================== */
-
+/* =========================================================
+   CAMERA LIST
+   ========================================================= */
 async function getCameraList(){
+  try{
+    cameras = await Html5Qrcode.getCameras();
 
-    try{
-
-        cameras =
-            await Html5Qrcode.getCameras();
-
-
-        if(
-            !cameras ||
-            cameras.length === 0
-        ){
-
-            setStatus(
-                "❌ Camera nahi mila.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        /*
-           Remove old options.
-        */
-
-        cameraSelect.innerHTML =
-            "";
-
-
-        /*
-           Add cameras.
-        */
-
-        cameras.forEach(
-            function(camera,index){
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    camera.id;
-
-
-                option.textContent =
-                    camera.label ||
-                    "Camera " +
-                    (index + 1);
-
-
-                cameraSelect.appendChild(
-                    option
-                );
-
-            }
-        );
-
-
-        /*
-           Prefer back camera.
-        */
-
-        let backCamera =
-            cameras.find(
-                function(camera){
-
-                    const label =
-                        (
-                            camera.label ||
-                            ""
-                        ).toLowerCase();
-
-
-                    return(
-                        label.includes("back") ||
-                        label.includes("rear") ||
-                        label.includes("environment")
-                    );
-
-                }
-            );
-
-
-        if(backCamera){
-
-            currentCameraId =
-                backCamera.id;
-
-        }else{
-
-            currentCameraId =
-                cameras[
-                    cameras.length - 1
-                ].id;
-
-        }
-
-
-        cameraSelect.value =
-            currentCameraId;
-
-
-    }catch(error){
-
-        console.error(error);
-
-        setStatus(
-            "❌ Camera list nahi mil rahi.",
-            "error"
-        );
-
+    if(!cameras.length){
+      setStatus("❌ Camera nahi mila.","error");
+      return false;
     }
 
+    cameraSelect.innerHTML = "";
+
+    cameras.forEach((camera,index)=>{
+      const option = document.createElement("option");
+      option.value = camera.id;
+      option.textContent = camera.label || ("Camera " + (index+1));
+      cameraSelect.appendChild(option);
+    });
+
+    // Rear/back/environment camera prefer karein
+    const back = cameras.find(c=>{
+      const label = (c.label || "").toLowerCase();
+      return label.includes("back") ||
+             label.includes("rear") ||
+             label.includes("environment") ||
+             label.includes("main");
+    });
+
+    currentCameraId = back ? back.id : cameras[cameras.length-1].id;
+    cameraSelect.value = currentCameraId;
+
+    return true;
+
+  }catch(error){
+    console.error(error);
+    setStatus("❌ Camera list nahi mil rahi.","error");
+    return false;
+  }
 }
 
+/* =========================================================
+   SCAN CONFIG
+   ========================================================= */
+function getScanConfig(){
+  return {
+    // 15 FPS = speed + stability ka balanced setting
+    fps: 15,
 
-/* =====================================================
-   START CAMERA
-   ===================================================== */
+    // QR ko camera frame ka approx 55% area dein.
+    // Dense Bihar challan QR ke liye sufficient aur fast.
+    qrbox: function(viewfinderWidth,viewfinderHeight){
+      const minEdge = Math.min(viewfinderWidth,viewfinderHeight);
+      const size = Math.max(240,Math.min(360,Math.floor(minEdge * 0.55)));
+      return {width:size,height:size};
+    },
 
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.QR_CODE
+    ],
+
+    // QR ko mirror na karein
+    disableFlip: true,
+
+    // Browser support hone par native BarcodeDetector use karega
+    experimentalFeatures: {
+      useBarCodeDetectorIfSupported: true
+    }
+  };
+}
+
+/* =========================================================
+   START
+   ========================================================= */
 async function startScanner(){
 
-    if(
-        scannerRunning
-    ){
+  if(scannerRunning) return;
 
-        return;
+  setStatus("📷 Camera permission/check ho raha hai...");
+
+  try{
+    if(!scanner){
+      scanner = new Html5Qrcode("reader");
     }
 
+    if(!cameras.length){
+      const ok = await getCameraList();
+      if(!ok) return;
+    }
 
-    setStatus(
-        "📷 Camera permission/check ho raha hai..."
+    let cameraConfig = currentCameraId
+      ? {deviceId:{exact:currentCameraId}}
+      : {facingMode:"environment"};
+
+    await scanner.start(
+      cameraConfig,
+      getScanConfig(),
+      onScanSuccess,
+      onScanFailure
     );
 
+    scannerRunning = true;
+    startButton.disabled = true;
+    stopButton.disabled = false;
 
+    setStatus("📷 Camera Ready — QR ko box ke andar rakhein.");
+
+    await checkTorch();
+
+  }catch(error){
+    console.error("Camera start error:",error);
+
+    // Device ID fail ho to environment camera try
     try{
-
-        /*
-           Create scanner.
-        */
-
-        if(
-            !html5QrCode
-        ){
-
-            html5QrCode =
-                new Html5Qrcode(
-                    "reader"
-                );
-
-        }
-
-
-        /*
-           Agar camera list nahi hai,
-           pehle get cameras.
-        */
-
-        if(
-            cameras.length === 0
-        ){
-
-            await getCameraList();
-
-        }
-
-
-        /*
-           If camera ID available,
-           use it.
-        */
-
-        let cameraConfig;
-
-
-        if(
-            currentCameraId
-        ){
-
-            cameraConfig = {
-                deviceId:{
-                    exact:
-                        currentCameraId
-                }
-            };
-
-        }else{
-
-            /*
-               Fallback.
-            */
-
-            cameraConfig = {
-                facingMode:
-                    "environment"
-            };
-
-        }
-
-
-        /*
-           ADVANCED CONFIG
-        */
-
-        const config = {
-
-            /*
-               20 FPS stable.
-               30 FPS every device par
-               better nahi hota.
-            */
-
-            fps:20,
-
-
-            /*
-               Dynamic QR box.
-            */
-
-            qrbox:function(
-                width,
-                height
-            ){
-
-                const minEdge =
-                    Math.min(
-                        width,
-                        height
-                    );
-
-
-                /*
-                   70% scanning area.
-                */
-
-                const size =
-                    Math.floor(
-                        minEdge * 0.70
-                    );
-
-
-                return{
-                    width:size,
-                    height:size
-                };
-
-            },
-
-
-            /*
-               QR only.
-            */
-
-            formatsToSupport:[
-                Html5QrcodeSupportedFormats.QR_CODE
-            ],
-
-
-            /*
-               16:9 camera.
-            */
-
-            aspectRatio:
-                1.7777778,
-
-
-            /*
-               Do not flip.
-            */
-
-            disableFlip:true,
-
-
-            /*
-               Native BarcodeDetector
-               where supported.
-            */
-
-            experimentalFeatures:{
-                useBarCodeDetectorIfSupported:true
-            }
-
-        };
-
-
-        /*
-           START
-        */
-
-        await html5QrCode.start(
-
-            cameraConfig,
-
-            config,
-
-            onScanSuccess,
-
-            onScanFailure
-
-        );
-
-
-        scannerRunning =
-            true;
-
-
-        startButton.disabled =
-            true;
-
-
-        stopButton.disabled =
-            false;
-
-
-        setStatus(
-            "📷 Camera Ready — QR ko box ke andar rakhein."
-        );
-
-
-        /*
-           Torch support check.
-        */
-
-        checkTorch();
-
-
-    }catch(error){
-
-        console.error(
-            "Camera start error:",
-            error
-        );
-
-
-        /*
-           Fallback:
-           environment camera.
-        */
-
-        try{
-
-            await html5QrCode.start(
-
-                {
-                    facingMode:
-                        "environment"
-                },
-
-                {
-                    fps:20,
-
-                    qrbox:250,
-
-                    formatsToSupport:[
-                        Html5QrcodeSupportedFormats.QR_CODE
-                    ],
-
-                    disableFlip:true
-                },
-
-                onScanSuccess,
-
-                onScanFailure
-
-            );
-
-
-            scannerRunning =
-                true;
-
-
-            startButton.disabled =
-                true;
-
-
-            setStatus(
-                "📷 Camera Ready — QR scan kijiye."
-            );
-
-
-            checkTorch();
-
-
-        }catch(error2){
-
-            console.error(
-                "Fallback camera error:",
-                error2
-            );
-
-
-            scannerRunning =
-                false;
-
-
-            startButton.disabled =
-                false;
-
-
-            setStatus(
-                "❌ Camera start nahi hua. Camera permission allow karein.",
-                "error"
-            );
-
-        }
-
+      if(scanner && scannerRunning) await scanner.stop().catch(()=>{});
+
+      await scanner.start(
+        {facingMode:"environment"},
+        getScanConfig(),
+        onScanSuccess,
+        onScanFailure
+      );
+
+      scannerRunning = true;
+      startButton.disabled = true;
+      stopButton.disabled = false;
+
+      setStatus("📷 Camera Ready — QR scan kijiye.");
+      await checkTorch();
+
+    }catch(error2){
+      console.error("Fallback camera error:",error2);
+      scannerRunning = false;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      setStatus(
+        "❌ Camera start nahi hua. Browser camera permission check karein.",
+        "error"
+      );
     }
-
+  }
 }
 
-
-/* =====================================================
-   STOP CAMERA
-   ===================================================== */
-
+/* =========================================================
+   STOP
+   ========================================================= */
 async function stopScanner(){
+  if(!scanner || !scannerRunning) return;
 
-    if(
-        !html5QrCode ||
-        !scannerRunning
-    ){
+  try{
+    await scanner.stop();
+    scannerRunning = false;
+    torchOn = false;
 
-        return;
-    }
+    startButton.disabled = false;
+    stopButton.disabled = true;
+    torchButton.style.display = "none";
 
+    setStatus("⏹️ Camera stopped.");
 
-    try{
-
-        await html5QrCode.stop();
-
-
-        scannerRunning =
-            false;
-
-
-        startButton.disabled =
-            false;
-
-
-        stopButton.disabled =
-            true;
-
-
-        torchButton.style.display =
-            "none";
-
-
-        setStatus(
-            "⏹️ Camera stopped."
-        );
-
-
-    }catch(error){
-
-        console.error(
-            "Stop error:",
-            error
-        );
-
-    }
-
+  }catch(error){
+    console.error("Stop error:",error);
+  }
 }
 
-
-/* =====================================================
+/* =========================================================
    CHANGE CAMERA
-   ===================================================== */
+   ========================================================= */
+cameraSelect.addEventListener("change",async()=>{
+  const id = cameraSelect.value;
+  if(!id) return;
 
-async function changeCamera(){
+  currentCameraId = id;
 
-    const newCamera =
-        cameraSelect.value;
-
-
-    if(
-        !newCamera
-    ){
-
-        return;
-    }
-
-
-    currentCameraId =
-        newCamera;
-
-
-    /*
-       Stop current.
-    */
-
-    if(
-        scannerRunning
-    ){
-
-        await stopScanner();
-
-    }
-
-
-    /*
-       Start selected camera.
-    */
-
+  if(scannerRunning){
+    await stopScanner();
     await startScanner();
+  }
+});
 
-}
-
-
-/* =====================================================
+/* =========================================================
    TORCH
-===================================================== */
-
+   ========================================================= */
 async function checkTorch(){
+  try{
+    const capabilities = await scanner.getRunningTrackCapabilities();
 
-    try{
-
-        const capabilities =
-            await html5QrCode
-                .getRunningTrackCapabilities();
-
-
-        if(
-            capabilities &&
-            capabilities.torch
-        ){
-
-            torchButton.style.display =
-                "inline-block";
-
-        }else{
-
-            torchButton.style.display =
-                "none";
-
-        }
-
-    }catch(error){
-
-        torchButton.style.display =
-            "none";
-
+    if(capabilities && capabilities.torch){
+      torchButton.style.display = "inline-block";
+      torchButton.innerText = "🔦 Torch ON";
+    }else{
+      torchButton.style.display = "none";
     }
-
+  }catch(e){
+    torchButton.style.display = "none";
+  }
 }
-
-
-/* =====================================================
-   TOGGLE TORCH
-===================================================== */
 
 async function toggleTorch(){
+  if(!scanner || !scannerRunning) return;
 
-    if(
-        !html5QrCode ||
-        !scannerRunning
-    ){
+  try{
+    torchOn = !torchOn;
 
-        return;
-    }
+    await scanner.applyVideoConstraints({
+      advanced:[{torch:torchOn}]
+    });
 
+    torchButton.innerText = torchOn
+      ? "🔦 Torch OFF"
+      : "🔦 Torch ON";
 
-    try{
-
-        torchOn =
-            !torchOn;
-
-
-        await html5QrCode.applyVideoConstraints({
-
-            advanced:[
-                {
-                    torch:
-                        torchOn
-                }
-            ]
-
-        });
-
-
-        torchButton.innerText =
-            torchOn
-            ? "🔦 Torch OFF"
-            : "🔦 Torch ON";
-
-
-    }catch(error){
-
-        console.error(
-            "Torch error:",
-            error
-        );
-
-
-        setStatus(
-            "⚠️ Is camera me Torch support nahi hai.",
-            "warning"
-        );
-
-    }
-
+  }catch(error){
+    console.error(error);
+    torchOn = false;
+    setStatus("⚠️ Is camera me Torch support nahi hai.","warning");
+  }
 }
 
+/* =========================================================
+   PHOTO QR SCAN
+   ========================================================= */
+document.getElementById("qrImage").addEventListener("change",async(event)=>{
+  const file = event.target.files[0];
+  if(!file) return;
 
-/* =====================================================
-   PHOTO SCAN
-   ===================================================== */
+  setStatus("🔍 QR photo scan ho rahi hai...");
 
-document
-.getElementById("qrImage")
-.addEventListener(
-    "change",
-    async function(event){
+  // Camera running ho to temporary stop
+  const wasRunning = scannerRunning;
+  if(wasRunning) await stopScanner();
 
-        const file =
-            event.target.files[0];
+  const imageScanner = new Html5Qrcode("reader");
 
+  try{
+    const decodedText = await imageScanner.scanFile(file,true);
 
-        if(!file){
+    showResult(decodedText);
+    setStatus("✅ Photo se QR successfully read ho gaya!","success");
+    beep();
+    vibrate();
+    saveToGoogleSheet(decodedText);
 
-            return;
-        }
-
-
-        setStatus(
-            "🔍 QR photo scan ho rahi hai..."
-        );
-
-
-        /*
-           Separate scanner.
-        */
-
-        const imageScanner =
-            new Html5Qrcode(
-                "reader"
-            );
-
-
-        try{
-
-            const decodedText =
-                await imageScanner.scanFile(
-                    file,
-                    true
-                );
-
-
-            showResult(
-                decodedText
-            );
-
-
-            setStatus(
-                "✅ Photo se QR successfully read ho gaya!",
-                "success"
-            );
-
-
-            beep();
-
-            vibrate();
-
-
-            saveToGoogleSheet(
-                decodedText
-            );
-
-
-        }catch(error){
-
-            console.error(
-                "Image scan error:",
-                error
-            );
-
-
-            setStatus(
-                "❌ Photo me QR detect nahi hua. Clear QR photo try karein.",
-                "error"
-            );
-
-        }
-
-
-        try{
-
-            await imageScanner.clear();
-
-        }catch(e){}
-
-    }
-);
-
-
-/* =====================================================
-   MANUAL URL
-   ===================================================== */
-
-function manualSubmit(){
-
-    const input =
-        document.getElementById(
-            "manualUrl"
-        );
-
-
-    const url =
-        input.value.trim();
-
-
-    if(!url){
-
-        setStatus(
-            "⚠️ QR URL paste kijiye.",
-            "warning"
-        );
-
-        return;
-    }
-
-
-    showResult(
-        url
-    );
-
-
+  }catch(error){
+    console.error("Image scan error:",error);
     setStatus(
-        "✅ Manual URL Google Sheet me save ho raha hai...",
-        "success"
+      "❌ Photo me QR detect nahi hua. Clear/straight QR photo try karein.",
+      "error"
     );
+  }
 
+  try{ await imageScanner.clear(); }catch(e){}
 
-    saveToGoogleSheet(
-        url
-    );
+  // Camera ko wapas start karein
+  if(wasRunning) await startScanner();
+});
 
+/* =========================================================
+   MANUAL URL
+   ========================================================= */
+function manualSubmit(){
+  const input = document.getElementById("manualUrl");
+  const value = input.value.trim();
 
-    input.value =
-        "";
+  if(!value){
+    setStatus("⚠️ QR URL paste kijiye.","warning");
+    return;
+  }
 
+  showResult(value);
+  setStatus("✅ Manual URL Google Sheet me save ho raha hai...","success");
+  saveToGoogleSheet(value);
+  input.value = "";
 }
 
-
-/* =====================================================
+/* =========================================================
    PAGE LOAD
-   ===================================================== */
+   ========================================================= */
+window.addEventListener("load",async()=>{
+  stopButton.disabled = true;
 
-window.addEventListener(
-    "load",
-    async function(){
+  try{
+    scanner = new Html5Qrcode("reader");
+    await startScanner();
+  }catch(e){
+    console.error(e);
+    setStatus("📷 Start Camera button dabayein.","warning");
+  }
+});
 
-        /*
-           First create scanner.
-        */
-
-        html5QrCode =
-            new Html5Qrcode(
-                "reader"
-            );
-
-
-        /*
-           Automatically start.
-        */
-
-        await startScanner();
-
-    }
-);
-
-
-/* =====================================================
+/* =========================================================
    PAGE CLOSE
-   ===================================================== */
-
-window.addEventListener(
-    "beforeunload",
-    function(){
-
-        if(
-            html5QrCode &&
-            scannerRunning
-        ){
-
-            html5QrCode
-                .stop()
-                .catch(
-                    function(){}
-                );
-
-        }
-
-    }
-);
-
+   ========================================================= */
+window.addEventListener("beforeunload",()=>{
+  if(scanner && scannerRunning){
+    scanner.stop().catch(()=>{});
+  }
+});
 </script>
-
 </body>
 </html>
