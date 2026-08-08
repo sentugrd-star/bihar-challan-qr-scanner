@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Bihar Sand Challan QR Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #1b5e20;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+    }
+
+    .box {
+      max-width: 450px;
+      margin: 15px auto;
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    input {
+      width: 95%;
+      padding: 12px;
+      font-size: 15px;
+      margin: 8px 0;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 12px 20px;
+      background: #1b5e20;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>🚚 Bihar Sand Challan</h2>
+  <p>QR Code Scan Kijiye</p>
+
+  <div id="reader"></div>
+
+  <div class="box">
+
+    <input
+      type="text"
+      id="urlInput"
+      placeholder="QR URL yahan bhi paste kar sakte hain"
+    >
+
+    <br>
+
+    <button onclick="submitURL()">
+      Submit URL
+    </button>
+
+    <div id="status"></div>
+
+  </div>
+
+  <script>
+
+    // ==========================================
+    // APPS SCRIPT WEB APP URL
+    // ==========================================
+
+    const APPS_SCRIPT_URL =
+      "YAHAN_APPS_SCRIPT_WEB_APP_URL_PASTE_KARE";
+
+
+    // ==========================================
+    // QR SCAN SUCCESS
+    // ==========================================
+
+    function onScanSuccess(decodedText, decodedResult) {
+
+      document.getElementById("urlInput").value = decodedText;
+
+      document.getElementById("status").innerHTML =
+        "✅ QR Scan ho gaya. Google Sheet me bhej rahe hain...";
+
+      sendToGoogleSheet(decodedText);
+    }
+
+
+    // ==========================================
+    // SEND URL TO APPS SCRIPT
+    // ==========================================
+
+    function sendToGoogleSheet(url) {
+
+      if (!url) {
+        alert("QR URL nahi mila.");
+        return;
+      }
+
+      if (
+        APPS_SCRIPT_URL ===
+        "YAHAN_APPS_SCRIPT_WEB_APP_URL_PASTE_KARE"
+      ) {
+        alert("Pehle Apps Script Web App URL paste kijiye.");
+        return;
+      }
+
+      const finalURL =
+        APPS_SCRIPT_URL +
+        "?url=" +
+        encodeURIComponent(url);
+
+      // Hidden iframe - CORS problem nahi hogi
+      const iframe = document.createElement("iframe");
+
+      iframe.style.display = "none";
+      iframe.src = finalURL;
+
+      document.body.appendChild(iframe);
+
+      setTimeout(function () {
+
+        document.getElementById("status").innerHTML =
+          "✅ Challan Google Sheet me save ho gaya.";
+
+      }, 2000);
+    }
+
+
+    // ==========================================
+    // MANUAL URL SUBMIT
+    // ==========================================
+
+    function submitURL() {
+
+      const url =
+        document.getElementById("urlInput").value.trim();
+
+      if (!url) {
+        alert("QR URL enter kijiye.");
+        return;
+      }
+
+      document.getElementById("status").innerHTML =
+        "⏳ Google Sheet me save ho raha hai...";
+
+      sendToGoogleSheet(url);
+    }
+
+
+    // ==========================================
+    // START CAMERA
+    // ==========================================
+
+    const scanner =
+      new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: {
+            width: 250,
+            height: 250
+          },
+          rememberLastUsedCamera: true
+        },
+        false
+      );
+
+    scanner.render(
+      onScanSuccess,
+      function(errorMessage) {
+        // normal scanning errors ignore
+      }
+    );
+
+  </script>
+
+</body>
+</html>
