@@ -2,555 +2,1279 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
 <title>Bihar Sand Challan QR Scanner</title>
 
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <style>
 *{box-sizing:border-box}
+
 body{
-  margin:0;padding:12px;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f3f5f4;color:#222
+  margin:0;
+  padding:12px;
+  font-family:Arial,sans-serif;
+  background:#f3f5f4;
+  color:#222
 }
-.container{width:100%;max-width:650px;margin:auto}
-.header{text-align:center;margin-bottom:10px}
-.header h1{margin:5px 0;color:#176b3a;font-size:25px}
-.header p{margin:5px 0;color:#555}
+
+.container{
+  width:100%;
+  max-width:700px;
+  margin:auto
+}
+
+h1{
+  text-align:center;
+  color:#176b3a;
+  font-size:26px;
+  margin:8px 0
+}
+
+.subtitle{
+  text-align:center;
+  color:#555;
+  margin-bottom:12px
+}
 
 .camera-card{
-  background:#000;border-radius:15px;overflow:hidden;
-  position:relative;box-shadow:0 3px 12px rgba(0,0,0,.15)
+  background:#000;
+  border-radius:16px;
+  overflow:hidden;
+  width:100%;
+  min-height:320px
 }
-#reader{width:100%;min-height:320px}
-#reader video{width:100%!important;height:auto!important;object-fit:cover}
+
+#reader{
+  width:100%
+}
+
+#reader video{
+  width:100%!important;
+  height:auto!important;
+  object-fit:cover
+}
 
 .status{
-  margin:12px 0;padding:13px;border-radius:9px;
-  background:#e9eceb;text-align:center;font-weight:bold
+  margin:12px 0;
+  padding:14px;
+  border-radius:10px;
+  background:#e9eceb;
+  text-align:center;
+  font-weight:bold;
+  font-size:16px
 }
-.status.success{background:#d8f5df;color:#126b2d}
-.status.error{background:#ffe0e0;color:#a00000}
-.status.warning{background:#fff2cc;color:#795900}
+
+.success{
+  background:#d9f5df;
+  color:#116b2c
+}
+
+.error{
+  background:#ffe0e0;
+  color:#a00000
+}
+
+.warning{
+  background:#fff0c2;
+  color:#765700
+}
 
 .controls{
-  display:flex;flex-wrap:wrap;justify-content:center;
-  gap:8px;margin:10px 0
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin:12px 0
 }
-button{
-  border:0;border-radius:8px;padding:12px 17px;
-  background:#176b3a;color:white;font-size:15px;cursor:pointer
-}
-button:active{transform:scale(.97)}
-button.secondary{background:#555}
-button.danger{background:#a00000}
-button:disabled{opacity:.5}
 
-.option-card,.result-card{
-  background:white;padding:15px;margin-top:15px;
-  border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)
+button{
+  border:0;
+  border-radius:9px;
+  padding:13px 18px;
+  font-size:16px;
+  color:white;
+  background:#176b3a;
+  cursor:pointer
 }
-.result-title{font-weight:bold;color:#176b3a;margin-bottom:8px}
-#result{word-break:break-all;font-size:14px;line-height:1.5}
-.open-link{
-  display:inline-block;margin-top:12px;padding:10px 15px;
-  background:#176b3a;color:white;text-decoration:none;border-radius:7px
+
+button.danger{
+  background:#b00000
 }
+
+button.secondary{
+  background:#555
+}
+
+button:disabled{
+  opacity:.45
+}
+
+.card{
+  background:white;
+  padding:16px;
+  margin-top:15px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08)
+}
+
+.card h3{
+  margin:0 0 10px;
+  color:#176b3a
+}
+
+select,
 input[type=text]{
-  width:100%;padding:13px;border:1px solid #aaa;
-  border-radius:7px;font-size:16px;outline:none
+  width:100%;
+  padding:14px;
+  font-size:16px;
+  border:2px solid #777;
+  border-radius:9px;
+  background:white
 }
-input[type=text]:focus{border-color:#176b3a}
-input[type=file]{width:100%;padding:10px 0}
-#cameraSelect{
-  width:100%;padding:11px;border-radius:7px;
-  border:1px solid #aaa;background:white;margin-top:8px
+
+input[type=file]{
+  width:100%;
+  padding:10px 0;
+  font-size:15px
 }
-.small{text-align:center;color:#777;font-size:12px;margin:18px 0}
-.hint{text-align:center;color:#555;font-size:13px;margin:8px 0}
+
+#result{
+  word-break:break-all;
+  line-height:1.5;
+  font-size:15px
+}
+
+.open-link{
+  display:inline-block;
+  margin-top:12px;
+  padding:11px 16px;
+  background:#176b3a;
+  color:white;
+  text-decoration:none;
+  border-radius:8px
+}
+
+.hint{
+  text-align:center;
+  color:#555;
+  margin:10px 0;
+  font-size:14px
+}
+
+.small{
+  text-align:center;
+  color:#777;
+  margin:20px 0
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-  <div class="header">
-    <h1>🚚 Bihar Sand Challan</h1>
-    <p>📷 Fast QR Code Scanner</p>
-  </div>
+<h1>🚚 Bihar Sand Challan</h1>
 
-  <div class="camera-card">
-    <div id="reader"></div>
-  </div>
-
-  <div id="status" class="status">
-    📷 Camera start ho raha hai...
-  </div>
-
-  <div class="hint">
-    QR ko box ke beech mein rakhein • 15–30 cm distance rakhein
-  </div>
-
-  <div class="controls">
-    <button id="startBtn" onclick="startScanner()">▶️ Start Camera</button>
-    <button id="stopBtn" class="danger" onclick="stopScanner()">⏹️ Stop</button>
-    <button id="torchBtn" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch ON</button>
-  </div>
-
-  <div class="option-card">
-    <b>📷 Camera</b>
-    <select id="cameraSelect">
-      <option value="">Camera select karein</option>
-    </select>
-  </div>
-
-  <div class="result-card">
-    <div class="result-title">✅ Scan Result</div>
-    <div id="result">QR scan hone ke baad URL yahan dikhega.</div>
-  </div>
-
-  <div class="option-card">
-    <h3>🖼️ QR Photo Se Scan</h3>
-    <p>QR ki clear photo select karein.</p>
-    <input type="file" id="qrImage" accept="image/*">
-  </div>
-
-  <div class="option-card">
-    <h3>🔗 Manual URL</h3>
-    <input type="text" id="manualUrl" placeholder="QR URL yahan paste karein">
-    <div class="controls">
-      <button onclick="manualSubmit()">Submit URL</button>
-    </div>
-  </div>
-
-  <div class="small">Bihar Sand Challan QR Scanner</div>
+<div class="subtitle">
+📷 Fast QR Code Scanner
 </div>
 
+<div class="camera-card">
+  <div id="reader"></div>
+</div>
+
+<div id="status" class="status">
+  📷 Start Camera dabayein.
+</div>
+
+<div class="hint">
+  QR ko box ke andar rakhein • QR ko clear aur seedha rakhein.
+</div>
+
+<div class="controls">
+
+  <button id="startBtn" onclick="startCamera()">
+    ▶️ Start Camera
+  </button>
+
+  <button id="stopBtn"
+          class="danger"
+          onclick="stopCamera()"
+          disabled>
+    ⏹️ Stop
+  </button>
+
+  <button id="torchBtn"
+          class="secondary"
+          onclick="toggleTorch()"
+          style="display:none">
+    🔦 Torch ON
+  </button>
+
+</div>
+
+
+<!-- CAMERA SELECTION -->
+
+<div class="card">
+
+<h3>📷 Camera Select Karein</h3>
+
+<select id="cameraSelect">
+  <option value="">Camera permission ke baad list aayegi</option>
+</select>
+
+</div>
+
+
+<!-- RESULT -->
+
+<div class="card">
+
+<h3>✅ Scan Result</h3>
+
+<div id="result">
+  QR scan hone ke baad URL yahan dikhega.
+</div>
+
+</div>
+
+
+<!-- PHOTO SCAN -->
+
+<div class="card">
+
+<h3>🖼️ QR Photo Se Scan</h3>
+
+<p>
+QR ki clear photo select karein.
+</p>
+
+<input
+  type="file"
+  id="qrImage"
+  accept="image/*">
+
+</div>
+
+
+<!-- MANUAL -->
+
+<div class="card">
+
+<h3>🔗 Manual URL</h3>
+
+<input
+  type="text"
+  id="manualUrl"
+  placeholder="QR URL yahan paste karein">
+
+<div class="controls">
+
+<button onclick="manualSubmit()">
+  Submit URL
+</button>
+
+</div>
+
+</div>
+
+<div class="small">
+Bihar Sand Challan QR Scanner
+</div>
+
+</div>
+
+
 <script>
+
 /* =========================================================
-   GOOGLE APPS SCRIPT WEB APP URL
+   GOOGLE APPS SCRIPT URL
    ========================================================= */
+
 const APPS_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNIGvq3Vx7SHSree91OR0BICZU5TBN/exec";
 
+
 /* =========================================================
-   GLOBALS
+   VARIABLES
    ========================================================= */
+
 let scanner = null;
+
 let cameras = [];
+
 let currentCameraId = "";
+
 let scannerRunning = false;
-let scanLocked = false;
-let lastScannedText = "";
+
 let torchOn = false;
 
-const statusBox = document.getElementById("status");
-const resultBox = document.getElementById("result");
-const cameraSelect = document.getElementById("cameraSelect");
-const startButton = document.getElementById("startBtn");
-const stopButton = document.getElementById("stopBtn");
-const torchButton = document.getElementById("torchBtn");
+let lastScannedText = "";
 
-function setStatus(message,type=""){
-  statusBox.className = "status" + (type ? " " + type : "");
-  statusBox.innerText = message;
+let lastScanTime = 0;
+
+let scanLocked = false;
+
+
+const statusBox =
+document.getElementById("status");
+
+const resultBox =
+document.getElementById("result");
+
+const cameraSelect =
+document.getElementById("cameraSelect");
+
+const startBtn =
+document.getElementById("startBtn");
+
+const stopBtn =
+document.getElementById("stopBtn");
+
+const torchBtn =
+document.getElementById("torchBtn");
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+function setStatus(text,type=""){
+
+  statusBox.className =
+    "status " + type;
+
+  statusBox.innerText = text;
+
 }
 
-function escapeHTML(text){
-  return String(text)
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+
+function showResult(text){
+
+  const safe =
+    String(text)
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
+    .replace(/"/g,"&quot;");
 
-function showResult(text){
-  let html = "<b>QR Data:</b><br><br>" + escapeHTML(text);
+  let html =
+    "<b>QR Data:</b><br><br>" +
+    safe;
 
   if(/^https?:\/\//i.test(text)){
-    html += "<br><br><a class='open-link' href='" +
-      encodeURI(text) +
-      "' target='_blank' rel='noopener'>🔗 Open QR Link</a>";
+
+    html +=
+      "<br><br>" +
+      "<a class='open-link' " +
+      "href='" + encodeURI(text) + "' " +
+      "target='_blank'>" +
+      "🔗 Open QR Link" +
+      "</a>";
   }
+
   resultBox.innerHTML = html;
+
 }
 
-function beep(){
-  try{
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(!AC) return;
-    const audio = new AC();
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.frequency.value = 1000;
-    gain.gain.value = 0.08;
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.start();
-    osc.stop(audio.currentTime + 0.10);
-  }catch(e){}
-}
-
-function vibrate(){
-  try{
-    if(navigator.vibrate) navigator.vibrate([80,40,80]);
-  }catch(e){}
-}
 
 /* =========================================================
-   SAVE TO GOOGLE SHEET
+   BEEP
    ========================================================= */
+
+function beep(){
+
+  try{
+
+    const AudioContext =
+      window.AudioContext ||
+      window.webkitAudioContext;
+
+    if(!AudioContext) return;
+
+    const audio =
+      new AudioContext();
+
+    const oscillator =
+      audio.createOscillator();
+
+    const gain =
+      audio.createGain();
+
+    oscillator.frequency.value = 1000;
+
+    gain.gain.value = 0.08;
+
+    oscillator.connect(gain);
+
+    gain.connect(audio.destination);
+
+    oscillator.start();
+
+    oscillator.stop(
+      audio.currentTime + 0.12
+    );
+
+  }catch(e){}
+
+}
+
+
+/* =========================================================
+   VIBRATION
+   ========================================================= */
+
+function vibrate(){
+
+  try{
+
+    if(navigator.vibrate){
+
+      navigator.vibrate(
+        [80,40,80]
+      );
+
+    }
+
+  }catch(e){}
+
+}
+
+
+/* =========================================================
+   GOOGLE SHEET SAVE
+   ========================================================= */
+
 function saveToGoogleSheet(value){
+
   if(!value) return;
 
-  const finalURL =
-    APPS_SCRIPT_URL + "?url=" + encodeURIComponent(value);
+  const url =
+    APPS_SCRIPT_URL +
+    "?url=" +
+    encodeURIComponent(value);
 
-  const img = document.createElement("img");
+  /*
+   * Image request is used so browser CORS
+   * does not block the Apps Script request.
+   */
+
+  const img =
+    document.createElement("img");
+
   img.style.display = "none";
-  img.src = finalURL;
+
+  img.src = url;
+
   document.body.appendChild(img);
 
-  setTimeout(() => {
-    try{ img.remove(); }catch(e){}
+  setTimeout(function(){
+
+    try{
+      img.remove();
+    }catch(e){}
+
   },5000);
+
 }
+
 
 /* =========================================================
    QR SUCCESS
    ========================================================= */
-function onScanSuccess(decodedText){
-  if(!decodedText || scanLocked) return;
 
-  // Same QR ko baar-baar save na karein
-  if(decodedText === lastScannedText && scanLocked) return;
+function onScanSuccess(decodedText){
+
+  if(!decodedText) return;
+
+  if(scanLocked) return;
+
+  const now =
+    Date.now();
+
+  /*
+   * Same QR ko 5 second ke andar
+   * dobara save nahi karega.
+   */
+
+  if(
+    decodedText === lastScannedText &&
+    now - lastScanTime < 5000
+  ){
+
+    return;
+
+  }
 
   scanLocked = true;
-  lastScannedText = decodedText;
+
+  lastScannedText =
+    decodedText;
+
+  lastScanTime =
+    now;
 
   beep();
+
   vibrate();
+
   showResult(decodedText);
 
   setStatus(
-    "✅ QR Scan Successful — Google Sheet me save ho raha hai...",
+    "✅ QR Scan Successful — Google Sheet me save ho raha hai.",
     "success"
   );
 
   saveToGoogleSheet(decodedText);
 
-  // Scanner ko stop nahi karte; continuous scanning chalta rahega
-  setTimeout(() => {
+
+  /*
+   * Camera band nahi hoga.
+   * Next QR ke liye ready rahega.
+   */
+
+  setTimeout(function(){
+
     scanLocked = false;
-    setStatus("📷 Next QR Code scan kijiye...");
+
+    setStatus(
+      "📷 Next QR Code scan kijiye."
+    );
+
   },1200);
+
 }
 
-function onScanFailure(errorMessage){
-  // Normal: QR na milne par continuously errors aate hain.
-}
 
 /* =========================================================
-   CAMERA LIST
+   SCAN FAILURE
    ========================================================= */
-async function getCameraList(){
-  try{
-    cameras = await Html5Qrcode.getCameras();
 
-    if(!cameras.length){
-      setStatus("❌ Camera nahi mila.","error");
+function onScanFailure(error){
+
+  /*
+   * Yahan error show nahi karna.
+   * QR na milna normal hai.
+   */
+
+}
+
+
+/* =========================================================
+   GET CAMERA LIST
+   IMPORTANT:
+   Permission milne ke baad hi call karenge.
+   ========================================================= */
+
+async function loadCameraList(){
+
+  try{
+
+    cameras =
+      await Html5Qrcode.getCameras();
+
+    if(!cameras ||
+       cameras.length === 0){
+
+      setStatus(
+        "❌ Koi camera nahi mila.",
+        "error"
+      );
+
       return false;
     }
 
+
     cameraSelect.innerHTML = "";
 
-    cameras.forEach((camera,index)=>{
-      const option = document.createElement("option");
-      option.value = camera.id;
-      option.textContent = camera.label || ("Camera " + (index+1));
-      cameraSelect.appendChild(option);
-    });
 
-    // Rear/back/environment camera prefer karein
-    const back = cameras.find(c=>{
-      const label = (c.label || "").toLowerCase();
-      return label.includes("back") ||
-             label.includes("rear") ||
-             label.includes("environment") ||
-             label.includes("main");
-    });
+    cameras.forEach(
+      function(camera,index){
 
-    currentCameraId = back ? back.id : cameras[cameras.length-1].id;
-    cameraSelect.value = currentCameraId;
+        const option =
+          document.createElement("option");
+
+        option.value =
+          camera.id;
+
+        option.textContent =
+          camera.label ||
+          ("Camera " + (index + 1));
+
+        cameraSelect.appendChild(
+          option
+        );
+
+      }
+    );
+
+
+    /*
+     * BACK CAMERA ko automatically
+     * select karne ki koshish.
+     */
+
+    let backCamera =
+      cameras.find(function(camera){
+
+        const label =
+          (camera.label || "")
+          .toLowerCase();
+
+        return (
+          label.includes("back") ||
+          label.includes("rear") ||
+          label.includes("environment") ||
+          label.includes("main")
+        );
+
+      });
+
+
+    if(backCamera){
+
+      currentCameraId =
+        backCamera.id;
+
+    }else{
+
+      currentCameraId =
+        cameras[0].id;
+
+    }
+
+
+    cameraSelect.value =
+      currentCameraId;
+
 
     return true;
 
+
   }catch(error){
-    console.error(error);
-    setStatus("❌ Camera list nahi mil rahi.","error");
+
+    console.error(
+      "Camera list error:",
+      error
+    );
+
+    setStatus(
+      "❌ Camera list load nahi hui.",
+      "error"
+    );
+
     return false;
+
   }
+
 }
+
+
+/* =========================================================
+   REQUEST CAMERA PERMISSION
+   Ye dropdown problem ko solve karta hai.
+   ========================================================= */
+
+async function requestCameraPermission(){
+
+  if(!navigator.mediaDevices ||
+     !navigator.mediaDevices.getUserMedia){
+
+    throw new Error(
+      "Camera API supported nahi hai."
+    );
+
+  }
+
+
+  const stream =
+    await navigator.mediaDevices
+      .getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:"environment"
+          }
+        },
+
+        audio:false
+
+      });
+
+
+  /*
+   * Permission mil gaya.
+   * Temporary stream band kar dete hain.
+   */
+
+  stream
+    .getTracks()
+    .forEach(function(track){
+
+      track.stop();
+
+    });
+
+}
+
 
 /* =========================================================
    SCAN CONFIG
    ========================================================= */
-function getScanConfig(){
-  return {
-    // 15 FPS = speed + stability ka balanced setting
-    fps: 15,
 
-    // QR ko camera frame ka approx 55% area dein.
-    // Dense Bihar challan QR ke liye sufficient aur fast.
-    qrbox: function(viewfinderWidth,viewfinderHeight){
-      const minEdge = Math.min(viewfinderWidth,viewfinderHeight);
-      const size = Math.max(240,Math.min(360,Math.floor(minEdge * 0.55)));
-      return {width:size,height:size};
+function scanConfig(){
+
+  return {
+
+    /*
+     * Fast scanning
+     */
+
+    fps:15,
+
+    /*
+     * QR area
+     */
+
+    qrbox:function(
+      width,
+      height
+    ){
+
+      const size =
+        Math.floor(
+          Math.min(width,height) * 0.60
+        );
+
+      return {
+        width:Math.min(
+          360,
+          Math.max(220,size)
+        ),
+
+        height:Math.min(
+          360,
+          Math.max(220,size)
+        )
+      };
+
     },
 
-    formatsToSupport: [
+    /*
+     * Sirf QR Code
+     */
+
+    formatsToSupport:[
       Html5QrcodeSupportedFormats.QR_CODE
     ],
 
-    // QR ko mirror na karein
-    disableFlip: true,
+    disableFlip:true,
 
-    // Browser support hone par native BarcodeDetector use karega
-    experimentalFeatures: {
-      useBarCodeDetectorIfSupported: true
+    experimentalFeatures:{
+      useBarCodeDetectorIfSupported:true
     }
+
   };
+
 }
 
+
 /* =========================================================
-   START
+   START CAMERA
    ========================================================= */
-async function startScanner(){
 
-  if(scannerRunning) return;
+async function startCamera(){
 
-  setStatus("📷 Camera permission/check ho raha hai...");
+  if(scannerRunning){
+
+    return;
+
+  }
+
 
   try{
-    if(!scanner){
-      scanner = new Html5Qrcode("reader");
-    }
 
-    if(!cameras.length){
-      const ok = await getCameraList();
-      if(!ok) return;
-    }
-
-    let cameraConfig = currentCameraId
-      ? {deviceId:{exact:currentCameraId}}
-      : {facingMode:"environment"};
-
-    await scanner.start(
-      cameraConfig,
-      getScanConfig(),
-      onScanSuccess,
-      onScanFailure
+    setStatus(
+      "📷 Camera permission maang raha hai..."
     );
 
-    scannerRunning = true;
-    startButton.disabled = true;
-    stopButton.disabled = false;
 
-    setStatus("📷 Camera Ready — QR ko box ke andar rakhein.");
+    /*
+     * STEP 1
+     * Permission first
+     */
+
+    await requestCameraPermission();
+
+
+    /*
+     * STEP 2
+     * Permission ke baad camera list
+     */
+
+    await loadCameraList();
+
+
+    /*
+     * STEP 3
+     * Scanner create
+     */
+
+    if(!scanner){
+
+      scanner =
+        new Html5Qrcode("reader");
+
+    }
+
+
+    /*
+     * STEP 4
+     * Selected camera
+     */
+
+    let cameraConfig;
+
+
+    if(currentCameraId){
+
+      cameraConfig = {
+
+        deviceId:{
+          exact:currentCameraId
+        }
+
+      };
+
+    }else{
+
+      cameraConfig = {
+
+        facingMode:{
+          ideal:"environment"
+        }
+
+      };
+
+    }
+
+
+    /*
+     * STEP 5
+     * Scanner start
+     */
+
+    await scanner.start(
+
+      cameraConfig,
+
+      scanConfig(),
+
+      onScanSuccess,
+
+      onScanFailure
+
+    );
+
+
+    scannerRunning = true;
+
+    startBtn.disabled = true;
+
+    stopBtn.disabled = false;
+
+
+    setStatus(
+      "📷 Camera Ready — QR ko box ke andar rakhein."
+    );
+
 
     await checkTorch();
 
+
   }catch(error){
-    console.error("Camera start error:",error);
 
-    // Device ID fail ho to environment camera try
-    try{
-      if(scanner && scannerRunning) await scanner.stop().catch(()=>{});
+    console.error(
+      "Camera start error:",
+      error
+    );
 
-      await scanner.start(
-        {facingMode:"environment"},
-        getScanConfig(),
-        onScanSuccess,
-        onScanFailure
-      );
 
-      scannerRunning = true;
-      startButton.disabled = true;
-      stopButton.disabled = false;
+    scannerRunning = false;
 
-      setStatus("📷 Camera Ready — QR scan kijiye.");
-      await checkTorch();
+    startBtn.disabled = false;
 
-    }catch(error2){
-      console.error("Fallback camera error:",error2);
-      scannerRunning = false;
-      startButton.disabled = false;
-      stopButton.disabled = true;
-      setStatus(
-        "❌ Camera start nahi hua. Browser camera permission check karein.",
-        "error"
-      );
-    }
+    stopBtn.disabled = true;
+
+
+    setStatus(
+      "❌ Camera start nahi hua. Browser me Camera Permission Allow karein.",
+      "error"
+    );
+
   }
+
 }
 
+
 /* =========================================================
-   STOP
+   STOP CAMERA
    ========================================================= */
-async function stopScanner(){
-  if(!scanner || !scannerRunning) return;
+
+async function stopCamera(){
 
   try{
-    await scanner.stop();
+
+    if(scanner &&
+       scannerRunning){
+
+      await scanner.stop();
+
+    }
+
+
     scannerRunning = false;
+
     torchOn = false;
 
-    startButton.disabled = false;
-    stopButton.disabled = true;
-    torchButton.style.display = "none";
+    startBtn.disabled = false;
 
-    setStatus("⏹️ Camera stopped.");
+    stopBtn.disabled = true;
+
+    torchBtn.style.display = "none";
+
+
+    setStatus(
+      "⏹️ Camera stopped."
+    );
+
 
   }catch(error){
-    console.error("Stop error:",error);
+
+    console.error(
+      "Stop error:",
+      error
+    );
+
   }
+
 }
 
+
 /* =========================================================
-   CHANGE CAMERA
+   CAMERA CHANGE
    ========================================================= */
-cameraSelect.addEventListener("change",async()=>{
-  const id = cameraSelect.value;
-  if(!id) return;
 
-  currentCameraId = id;
+cameraSelect.addEventListener(
+  "change",
+  async function(){
 
-  if(scannerRunning){
-    await stopScanner();
-    await startScanner();
+    const id =
+      cameraSelect.value;
+
+    if(!id) return;
+
+    currentCameraId = id;
+
+
+    /*
+     * Agar scanner chal raha hai,
+     * selected camera par restart.
+     */
+
+    if(scannerRunning){
+
+      await stopCamera();
+
+      await startCamera();
+
+    }
+
   }
-});
+);
+
+
+/* =========================================================
+   TORCH CHECK
+   ========================================================= */
+
+async function checkTorch(){
+
+  try{
+
+    if(!scanner ||
+       !scannerRunning){
+
+      torchBtn.style.display =
+        "none";
+
+      return;
+
+    }
+
+
+    const capabilities =
+      scanner.getRunningTrackCapabilities();
+
+
+    if(
+      capabilities &&
+      capabilities.torch
+    ){
+
+      torchBtn.style.display =
+        "inline-block";
+
+      torchBtn.innerText =
+        "🔦 Torch ON";
+
+    }else{
+
+      torchBtn.style.display =
+        "none";
+
+    }
+
+
+  }catch(error){
+
+    torchBtn.style.display =
+      "none";
+
+  }
+
+}
+
 
 /* =========================================================
    TORCH
    ========================================================= */
-async function checkTorch(){
-  try{
-    const capabilities = await scanner.getRunningTrackCapabilities();
-
-    if(capabilities && capabilities.torch){
-      torchButton.style.display = "inline-block";
-      torchButton.innerText = "🔦 Torch ON";
-    }else{
-      torchButton.style.display = "none";
-    }
-  }catch(e){
-    torchButton.style.display = "none";
-  }
-}
 
 async function toggleTorch(){
-  if(!scanner || !scannerRunning) return;
+
+  if(!scanner ||
+     !scannerRunning){
+
+    return;
+
+  }
+
 
   try{
-    torchOn = !torchOn;
+
+    torchOn =
+      !torchOn;
+
 
     await scanner.applyVideoConstraints({
-      advanced:[{torch:torchOn}]
+
+      advanced:[
+        {
+          torch:torchOn
+        }
+      ]
+
     });
 
-    torchButton.innerText = torchOn
+
+    torchBtn.innerText =
+      torchOn
       ? "🔦 Torch OFF"
       : "🔦 Torch ON";
 
+
   }catch(error){
-    console.error(error);
+
+    console.error(
+      "Torch error:",
+      error
+    );
+
     torchOn = false;
-    setStatus("⚠️ Is camera me Torch support nahi hai.","warning");
+
+    setStatus(
+      "⚠️ Is camera me Torch support nahi hai.",
+      "warning"
+    );
+
   }
+
 }
 
+
 /* =========================================================
-   PHOTO QR SCAN
+   QR PHOTO SCAN
    ========================================================= */
-document.getElementById("qrImage").addEventListener("change",async(event)=>{
-  const file = event.target.files[0];
-  if(!file) return;
 
-  setStatus("🔍 QR photo scan ho rahi hai...");
+document
+.getElementById("qrImage")
+.addEventListener(
+  "change",
+  async function(event){
 
-  // Camera running ho to temporary stop
-  const wasRunning = scannerRunning;
-  if(wasRunning) await stopScanner();
+    const file =
+      event.target.files[0];
 
-  const imageScanner = new Html5Qrcode("reader");
+    if(!file) return;
 
-  try{
-    const decodedText = await imageScanner.scanFile(file,true);
 
-    showResult(decodedText);
-    setStatus("✅ Photo se QR successfully read ho gaya!","success");
-    beep();
-    vibrate();
-    saveToGoogleSheet(decodedText);
-
-  }catch(error){
-    console.error("Image scan error:",error);
     setStatus(
-      "❌ Photo me QR detect nahi hua. Clear/straight QR photo try karein.",
-      "error"
+      "🔍 QR photo scan ho rahi hai..."
     );
+
+
+    try{
+
+      const imageScanner =
+        new Html5Qrcode("reader");
+
+
+      const decodedText =
+        await imageScanner.scanFile(
+          file,
+          true
+        );
+
+
+      showResult(decodedText);
+
+      beep();
+
+      vibrate();
+
+      saveToGoogleSheet(
+        decodedText
+      );
+
+
+      setStatus(
+        "✅ Photo se QR successfully scan ho gaya.",
+        "success"
+      );
+
+
+      try{
+
+        await imageScanner.clear();
+
+      }catch(e){}
+
+
+    }catch(error){
+
+      console.error(
+        "Photo QR error:",
+        error
+      );
+
+
+      setStatus(
+        "❌ Photo me QR detect nahi hua. Clear QR photo select karein.",
+        "error"
+      );
+
+    }
+
   }
+);
 
-  try{ await imageScanner.clear(); }catch(e){}
-
-  // Camera ko wapas start karein
-  if(wasRunning) await startScanner();
-});
 
 /* =========================================================
    MANUAL URL
    ========================================================= */
+
 function manualSubmit(){
-  const input = document.getElementById("manualUrl");
-  const value = input.value.trim();
+
+  const input =
+    document.getElementById(
+      "manualUrl"
+    );
+
+
+  const value =
+    input.value.trim();
+
 
   if(!value){
-    setStatus("⚠️ QR URL paste kijiye.","warning");
+
+    setStatus(
+      "⚠️ QR URL paste kijiye.",
+      "warning"
+    );
+
     return;
+
   }
 
+
   showResult(value);
-  setStatus("✅ Manual URL Google Sheet me save ho raha hai...","success");
+
   saveToGoogleSheet(value);
+
+
+  setStatus(
+    "✅ Manual URL Google Sheet me save ho gaya.",
+    "success"
+  );
+
+
   input.value = "";
+
 }
+
 
 /* =========================================================
    PAGE LOAD
    ========================================================= */
-window.addEventListener("load",async()=>{
-  stopButton.disabled = true;
 
-  try{
-    scanner = new Html5Qrcode("reader");
-    await startScanner();
-  }catch(e){
-    console.error(e);
-    setStatus("📷 Start Camera button dabayein.","warning");
+window.addEventListener(
+  "load",
+  function(){
+
+    /*
+     * Camera automatically start nahi hoga.
+     * User Start Camera dabayega.
+     */
+
+    stopBtn.disabled = true;
+
+    setStatus(
+      "📷 Start Camera dabayein."
+    );
+
   }
-});
+);
+
 
 /* =========================================================
    PAGE CLOSE
    ========================================================= */
-window.addEventListener("beforeunload",()=>{
-  if(scanner && scannerRunning){
-    scanner.stop().catch(()=>{});
+
+window.addEventListener(
+  "beforeunload",
+  function(){
+
+    if(
+      scanner &&
+      scannerRunning
+    ){
+
+      scanner.stop()
+        .catch(function(){});
+
+    }
+
   }
-});
+);
+
 </script>
+
 </body>
 </html>
