@@ -92,9 +92,30 @@ th{background:#eef3ef}
   </div>
 
   <div class="small">
-    Verify button official Jharkhand Mines portal खोलता है. वहाँ CAPTCHA भरकर
-    सरकारी result verify करें.
+    Verify button online bridge के माध्यम से official Jharkhand Mines portal पर
+    verification शुरू करता है. CAPTCHA आपको दिखाई जाएगी; CAPTCHA भरने के बाद
+    verified result इसी page में automatically import/save हो जाएगा.
   </div>
+</div>
+
+<div id="captchaCard" class="card hidden">
+  <h2>🔐 Official Portal CAPTCHA</h2>
+  <div class="small">
+    Official Jharkhand portal की CAPTCHA image नीचे दिखाई जाएगी. CAPTCHA को देखकर
+    नीचे enter करें. CAPTCHA bypass नहीं किया जा रहा है.
+  </div>
+  <div style="text-align:center;margin:14px 0">
+    <img id="captchaImg" alt="Jharkhand CAPTCHA"
+      style="max-width:100%;background:#fff;border:1px solid #ccc;border-radius:8px;padding:6px;min-height:60px">
+  </div>
+  <label>CAPTCHA</label>
+  <input id="captchaInput" type="text" autocomplete="off"
+    placeholder="ऊपर दिखाई गई CAPTCHA लिखें">
+  <div class="controls">
+    <button onclick="submitCaptcha()">✅ Verify CAPTCHA</button>
+    <button class="secondary" onclick="startOnlineVerification()">🔄 New CAPTCHA</button>
+  </div>
+  <div id="captchaStatus" class="status info">CAPTCHA भरकर Verify CAPTCHA दबाएँ.</div>
 </div>
 
 <div class="card">
@@ -125,8 +146,9 @@ th{background:#eef3ef}
   </div>
 
   <p class="small">
-    Official verification page से values देखकर यहाँ paste/enter करें. इससे
-    website किसी CAPTCHA को bypass नहीं करती और गलत government data invent नहीं करती.
+    Online verification के बाद official portal से मिले verified values यहाँ
+    automatically fill/save होते हैं. CAPTCHA bypass नहीं किया जाता और website
+    government data invent नहीं करती.
   </p>
 </div>
 
@@ -168,6 +190,9 @@ th{background:#eef3ef}
 <script>
 const OFFICIAL_URL =
   "https://mineralsportal.jharkhand.gov.in/portal/epass/ViewPassDetailsNew.aspx";
+
+const API = "https://sentu-jharkhand-bridge.onrender.com";
+let bridgeSessionId = "";
 
 let reader = null;
 let controls = null;
@@ -343,25 +368,149 @@ async function toggleTorch(){
   }
 }
 
-function verifyJharkhand(){
+async function verifyJharkhand(){
   const value = $("challanNo").value.trim();
+
   if(!value){
     status("⚠️ पहले Challan / Serial Number डालें.", "warning");
     return;
   }
 
   const extracted = extractChallan(value);
-  if(extracted){
-    $("challanNo").value = extracted;
-    $("f_challan").value = extracted;
-  }
+  const challan = extracted || value.toUpperCase();
 
-  status("🔗 Official Jharkhand Verify Challan page खोला जा रहा है...", "info");
+  $("challanNo").value = challan;
+  $("f_challan").value = challan;
 
-  // Open official government verification page.
-  window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
+  await startOnlineVerification();
 }
 
+async function startOnlineVerification(){
+  const challan = $("challanNo").value.trim();
+
+  if(!challan){
+    status("⚠️ पहले Challan / Serial Number डालें.", "warning");
+    return;
+  }
+
+  bridgeSessionId = "";
+  $("captchaCard").classList.add("hidden");
+  $("captchaInput").value = "";
+  $("captchaImg").removeAttribute("src");
+
+  status(
+    "⏳ Online Jharkhand verification शुरू हो रही है. Free server sleep से जागने में थोड़ा समय लग सकता है...",
+    "info"
+  );
+  importStatus("Official Jharkhand portal से CAPTCHA लिया जा रहा है...", "info");
+
+  try{
+    const response = await fetch(API + "/api/start", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({challan})
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if(!response.ok || !result.ok){
+      throw new Error(result.error || "Online verification start नहीं हुआ.");
+    }
+
+    bridgeSessionId = result.sessionId || "";
+
+    if(!bridgeSessionId) throw new Error("Verification session नहीं मिला.");
+    if(!result.captcha) throw new Error("CAPTCHA image नहीं मिली.");
+
+    $("captchaImg").src = result.captcha;
+    $("captchaCard").classList.remove("hidden");
+    $("captchaInput").focus();
+
+    status("🔐 CAPTCHA मिल गई. CAPTCHA भरकर Verify CAPTCHA दबाएँ.", "success");
+    importStatus("CAPTCHA official Jharkhand portal से मिली है. अब CAPTCHA enter करें.", "info");
+
+  }catch(error){
+    console.error("ONLINE START ERROR:", error);
+    status("❌ Online verification शुरू नहीं हुआ: " + (error.message || error), "error");
+    importStatus("Bridge error: " + (error.message || error), "error");
+  }
+}
+
+async function submitCaptcha(){
+  if(!bridgeSessionId){
+    status("⚠️ Verification session नहीं है. New CAPTCHA दबाएँ.", "warning");
+    return;
+  }
+
+  const captcha = $("captchaInput").value.trim();
+
+  if(!captcha){
+    $("captchaStatus").className = "status warning";
+    $("captchaStatus").innerText = "⚠️ CAPTCHA enter करें.";
+    $("captchaInput").focus();
+    return;
+  }
+
+  $("captchaStatus").className = "status info";
+  $("captchaStatus").innerText = "⏳ Official portal पर CAPTCHA verify हो रही है...";
+  status("⏳ CAPTCHA verify हो रही है...", "info");
+
+  try{
+    const response = await fetch(API + "/api/verify", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sessionId:bridgeSessionId, captcha})
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if(!response.ok || !result.ok){
+      const msg = result.error || "Verification failed.";
+      $("captchaStatus").className = "status error";
+      $("captchaStatus").innerText = "❌ " + msg;
+      status("❌ " + msg, "error");
+      return;
+    }
+
+    const d = result.data || {};
+
+    $("f_challan").value = d.challan || $("challanNo").value || "";
+    $("f_pass").value = d.pass || "";
+    $("f_permit").value = d.permit || "";
+    $("f_date").value = d.date || "";
+    $("f_consigner").value = d.consigner || "";
+    $("f_location").value = d.location || d.generate || "";
+    $("f_destination").value = d.destination || "";
+    $("f_vehicle").value = d.vehicle || "";
+    $("f_mineral").value = d.mineral || "";
+    $("f_qty").value = d.quantity || "";
+    $("f_validity").value = d.validity || "";
+    $("f_source").value = d.source || "Jharkhand Minerals Portal";
+
+    bridgeSessionId = "";
+    $("captchaCard").classList.add("hidden");
+    $("captchaInput").value = "";
+
+    $("captchaStatus").className = "status success";
+    $("captchaStatus").innerText = "✅ Verification successful.";
+
+    status("✅ Jharkhand challan verified — Vehicle और Quantity सहित data मिल गया.", "success");
+    importStatus("✅ Official Jharkhand portal से data मिल गया. Data नीचे form में भर दिया गया है.", "success");
+
+    saveRecord();
+
+    document.querySelector("#f_challan").scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    });
+
+  }catch(error){
+    console.error("ONLINE VERIFY ERROR:", error);
+    $("captchaStatus").className = "status error";
+    $("captchaStatus").innerText = "❌ " + (error.message || error);
+    status("❌ Online verification error: " + (error.message || error), "error");
+  }
+}
 function openOfficial(){
   window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
 }
@@ -666,9 +815,14 @@ function exportCSV(){
 
 window.addEventListener("load",()=>{
   renderHistory();
+
   $("challanNo").addEventListener("input",()=>{
     const v=extractChallan($("challanNo").value);
     if(v) $("f_challan").value=v;
+  });
+
+  $("captchaInput").addEventListener("keydown",(event)=>{
+    if(event.key === "Enter") submitCaptcha();
   });
 });
 
