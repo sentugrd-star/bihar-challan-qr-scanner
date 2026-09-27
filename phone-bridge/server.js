@@ -575,7 +575,7 @@ app.get(
         "sentu-jharkhand-phone-bridge",
 
       version:
-        "2.2.0"
+        "2.3.0"
 
     });
 
@@ -635,17 +635,27 @@ app.post(
         await context.newPage();
 
 
+      // The Jharkhand portal can keep network requests open for a long time.
+      // Do not wait for DOMContentLoaded; start as soon as navigation commits,
+      // then wait specifically for the official challan input.
       await page.goto(
         PORTAL,
         {
           waitUntil:
-            "domcontentloaded",
+            "commit",
 
           timeout:
             60000
         }
       );
 
+      await page.waitForSelector(
+        "#txtPassNo",
+        {
+          state: "visible",
+          timeout: 60000
+        }
+      );
 
       await page.waitForTimeout(
         1500
