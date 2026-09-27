@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sentu Jharkhand Challan</title>
 
-<script src="https://unpkg.com/@zxing/browser@0.2.1/umd/zxing-browser.min.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 
 <style>
@@ -21,9 +20,6 @@ h1{font-size:25px;margin:0;text-align:center}
 .subtitle{text-align:center;margin-top:6px;opacity:.9}
 .card{background:var(--card);padding:16px;margin:12px 0;border-radius:14px;box-shadow:0 2px 9px rgba(0,0,0,.08)}
 .card h2,.card h3{margin:0 0 12px;color:var(--green)}
-.camera{background:#000;border-radius:14px;overflow:hidden;position:relative}
-#video{width:100%;height:380px;display:block;object-fit:cover;background:#000}
-.frame{position:absolute;width:68%;aspect-ratio:1;left:16%;top:50%;transform:translateY(-50%);border:4px solid #00ff66;border-radius:15px;pointer-events:none}
 .status{padding:13px;border-radius:10px;background:#edf0ee;font-weight:bold;text-align:center;margin:12px 0;word-break:break-word}
 .success{background:#d9f5df;color:#126b2d}.error{background:#ffe0e0;color:#a00000}
 .warning{background:#fff0c2;color:#765700}.info{background:#e5f0ff;color:#174c82}
@@ -51,33 +47,15 @@ th{background:#eef3ef}
 
 <header>
   <h1>🚚 Sentu Jharkhand Challan</h1>
-  <div class="subtitle">Jharkhand Minerals Portal • QR + Challan Number</div>
+  <div class="subtitle">Jharkhand Minerals Portal • Challan Verification</div>
 </header>
 
 <div class="card">
   <span class="badge">🇮🇳 JHARKHAND ONLY</span>
   <p class="small">
-    QR खराब होने पर नीचे Challan/Serial Number डालकर official Jharkhand
-    verification page खोलें. Government portal CAPTCHA मांगता है, इसलिए
-    CAPTCHA को bypass नहीं किया गया है.
+    नीचे Challan/Serial Number डालकर official Jharkhand verification करें.
+    Government portal CAPTCHA मांगता है, इसलिए CAPTCHA को bypass नहीं किया गया है.
   </p>
-</div>
-
-<div class="card">
-  <h2>📷 QR Scanner</h2>
-
-  <div class="camera">
-    <video id="video" autoplay muted playsinline></video>
-    <div class="frame"></div>
-  </div>
-
-  <div id="status" class="status">📷 Start Camera दबाएँ.</div>
-
-  <div class="controls">
-    <button id="startBtn" onclick="startScanner()">▶️ Start Camera</button>
-    <button id="stopBtn" class="danger" onclick="stopScanner()" disabled>⏹️ Stop</button>
-    <button id="torchBtn" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch</button>
-  </div>
 </div>
 
 <div class="card">
@@ -121,7 +99,7 @@ th{background:#eef3ef}
 <div class="card">
   <h2>📥 Challan Data Import</h2>
   <div id="importStatus" class="status info">
-    पहले QR scan या Challan Number डालें.
+    पहले Challan Number डालें या Chrome Extension से data verify/import करें.
   </div>
 
   <div class="grid">
@@ -146,9 +124,9 @@ th{background:#eef3ef}
   </div>
 
   <p class="small">
-    Online verification के बाद official portal से मिले verified values यहाँ
-    automatically fill/save होते हैं. CAPTCHA bypass नहीं किया जाता और website
-    government data invent नहीं करती.
+    Chrome Extension से verified data यहाँ import/save किया जा सकता है.
+    Online verification उपलब्ध रहने पर official portal से मिले verified values
+    automatically fill/save होते हैं. CAPTCHA bypass नहीं किया जाता.
   </p>
 </div>
 
@@ -171,7 +149,7 @@ th{background:#eef3ef}
   </div>
   <input id="excelFileInput" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(event)">
   <div class="small" style="text-align:center;margin-top:6px">
-    Saved Challans को Excel में download करें या Excel file से history में data import करें.
+    Saved Challans को Excel में download करें या Excel file से history में data import करें. Chrome Extension के साथ history/export भी रहेगा.
   </div>
 </div>
 
@@ -193,12 +171,6 @@ const OFFICIAL_URL =
 
 const API = "https://bihar-challan-qr-scanner-production.up.railway.app";
 let bridgeSessionId = "";
-
-let reader = null;
-let controls = null;
-let running = false;
-let torch = false;
-let lastText = "";
 
 const $ = id => document.getElementById(id);
 
@@ -249,123 +221,6 @@ function extractChallan(text){
   }
 
   return "";
-}
-
-function onQRSuccess(result){
-  let text = "";
-  if(typeof result === "string") text = result.trim();
-  else if(result && result.text) text = result.text.trim();
-  if(!text || text === lastText) return;
-
-  lastText = text;
-  beep(); vibrate();
-
-  const challan = extractChallan(text);
-
-  if(challan){
-    $("challanNo").value = challan;
-    $("f_challan").value = challan;
-    status("✅ Jharkhand Challan Number मिला: " + challan, "success");
-    importStatus("Challan number QR से मिला. अब Verify on Jharkhand Portal दबाएँ.", "success");
-  }else{
-    status("⚠️ QR पढ़ गया, लेकिन Jharkhand Challan Number नहीं मिला.", "warning");
-    importStatus("QR text: " + text, "warning");
-  }
-
-  setTimeout(()=>{ lastText = ""; }, 1500);
-}
-
-async function startScanner(){
-  if(running) return;
-
-  try{
-    if(!window.ZXingBrowser) throw new Error("ZXing library load नहीं हुई.");
-    if(location.protocol !== "https:" && location.hostname !== "localhost"){
-      throw new Error("Camera के लिए HTTPS required है.");
-    }
-
-    status("📷 Rear camera start हो रहा है...");
-    $("startBtn").disabled = true;
-
-    if(!reader) reader = new ZXingBrowser.BrowserQRCodeReader();
-
-    const constraints = {
-      video:{
-        facingMode:{ideal:"environment"},
-        width:{ideal:1280},
-        height:{ideal:720}
-      },
-      audio:false
-    };
-
-    controls = await reader.decodeFromConstraints(
-      constraints,
-      $("video"),
-      (result, error)=>{
-        if(result) onQRSuccess(result);
-      }
-    );
-
-    try{ await $("video").play(); }catch(e){}
-
-    running = true;
-    $("stopBtn").disabled = false;
-    status("📷 Camera Ready — QR को green box के अंदर रखें.", "success");
-    checkTorch();
-
-  }catch(e){
-    console.error(e);
-    $("startBtn").disabled = false;
-    $("stopBtn").disabled = true;
-    status("❌ Camera start नहीं हुआ: " + (e.message || e), "error");
-  }
-}
-
-function stopScanner(){
-  try{
-    if(controls && typeof controls.stop === "function") controls.stop();
-    if(reader) reader.reset();
-    if($("video").srcObject){
-      $("video").srcObject.getTracks().forEach(t=>t.stop());
-      $("video").srcObject = null;
-    }
-  }catch(e){}
-
-  controls = null;
-  running = false;
-  torch = false;
-  $("startBtn").disabled = false;
-  $("stopBtn").disabled = true;
-  $("torchBtn").style.display = "none";
-  status("⏹️ Camera stopped.");
-}
-
-function checkTorch(){
-  try{
-    const stream = $("video").srcObject;
-    if(!stream) return;
-    const track = stream.getVideoTracks()[0];
-    const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-    if(caps && caps.torch) $("torchBtn").style.display = "inline-block";
-  }catch(e){}
-}
-
-async function toggleTorch(){
-  try{
-    const stream = $("video").srcObject;
-    if(!stream) return;
-    const track = stream.getVideoTracks()[0];
-    const caps = track.getCapabilities();
-    if(!caps.torch){
-      status("⚠️ इस camera में Torch support नहीं है.", "warning");
-      return;
-    }
-    torch = !torch;
-    await track.applyConstraints({advanced:[{torch}]});
-    $("torchBtn").innerText = torch ? "🔦 Torch OFF" : "🔦 Torch ON";
-  }catch(e){
-    status("⚠️ Torch available नहीं है.", "warning");
-  }
 }
 
 async function verifyJharkhand(){
@@ -826,7 +681,6 @@ window.addEventListener("load",()=>{
   });
 });
 
-window.addEventListener("beforeunload",()=>stopScanner());
 </script>
 </body>
 </html>
