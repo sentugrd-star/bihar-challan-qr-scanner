@@ -118,7 +118,6 @@ th{background:#eef3ef}
   </div>
 
   <div class="controls">
-    <button onclick="saveRecord()">💾 Import / Save Data</button>
     <button class="secondary" onclick="clearForm()">🧹 Clear</button>
     <button class="orange" onclick="exportCSV()">📊 Export CSV</button>
   </div>
@@ -136,7 +135,7 @@ th{background:#eef3ef}
     <table>
       <thead>
         <tr>
-          <th>Challan</th><th>Date</th><th>Vehicle</th><th>Mineral</th><th>Qty</th><th>Action</th>
+          <th>S.No.</th><th>Challan</th><th>Date</th><th>Vehicle</th><th>Mineral</th><th>Qty</th><th>Action</th>
         </tr>
       </thead>
       <tbody id="historyBody"></tbody>
@@ -352,7 +351,7 @@ async function submitCaptcha(){
     status("✅ Jharkhand challan verified — Vehicle और Quantity सहित data मिल गया.", "success");
     importStatus("✅ Official Jharkhand portal से data मिल गया. Data नीचे form में भर दिया गया है.", "success");
 
-    saveRecord();
+    saveRecord(true);
 
     document.querySelector("#f_challan").scrollIntoView({
       behavior:"smooth",
@@ -404,24 +403,59 @@ function getForm(){
   };
 }
 
-function saveRecord(){
+function saveRecord(auto=false){
   const data = getForm();
 
-  if(!data.challan){
-    importStatus("⚠️ Challan / Serial Number जरूरी है.", "warning");
-    return;
+  // Auto-save only after a genuinely complete verified record is available.
+  if(!data.challan || !data.vehicle || !data.quantity){
+    if(!auto) importStatus("⚠️ Challan, Vehicle No. और Quantity जरूरी हैं.", "warning");
+    return false;
   }
 
   const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
+  const key = data.challan.trim().toUpperCase();
 
-  const existing = history.findIndex(x => x.challan.toUpperCase() === data.challan.toUpperCase());
-  if(existing >= 0) history[existing] = data;
-  else history.unshift(data);
+  // Same Challan/Serial No. = update existing record, never create a duplicate.
+  const existing = history.findIndex(
+    x => String(x.challan || "").trim().toUpperCase() === key
+  );
+
+  if(existing >= 0){
+    history[existing] = {...history[existing], ...data};
+  }else{
+    history.unshift(data);
+  }
 
   localStorage.setItem("sentu_jharkhand_challans", JSON.stringify(history));
   renderHistory();
 
-  importStatus("✅ Challan data successfully saved/imported.", "success");
+  importStatus(
+    existing >= 0
+      ? "♻️ Challan already in history — data updated, duplicate नहीं बनाया गया."
+      : "✅ Verified challan automatically saved to History.",
+    "success"
+  );
+
+  return true;
+}
+
+function autoSaveIfComplete(){
+  const challan = $("f_challan").value.trim();
+  const vehicle = $("f_vehicle").value.trim();
+  const quantity = $("f_qty").value.trim();
+
+  // Extension/portal may fill input values programmatically, so polling is used.
+  if(challan && vehicle && quantity){
+    const signature = [
+      challan.toUpperCase(), vehicle.toUpperCase(), quantity
+    ].join("|");
+
+    if(window.__lastAutoSavedSignature !== signature){
+      if(saveRecord(true)){
+        window.__lastAutoSavedSignature = signature;
+      }
+    }
+  }
 }
 
 function renderHistory(){
@@ -431,13 +465,14 @@ function renderHistory(){
   body.innerHTML = "";
 
   if(!history.length){
-    body.innerHTML = '<tr><td colspan="6">No saved challans.</td></tr>';
+    body.innerHTML = '<tr><td colspan="7">No saved challans.</td></tr>';
     return;
   }
 
   history.forEach((x,i)=>{
     const tr = document.createElement("tr");
     tr.innerHTML =
+      "<td>"+(i+1)+"</td>" +
       "<td>"+esc(x.challan)+"</td>" +
       "<td>"+esc(x.date)+"</td>" +
       "<td>"+esc(x.vehicle)+"</td>" +
@@ -469,6 +504,7 @@ function loadRecord(i){
 }
 
 function clearForm(){
+  window.__lastAutoSavedSignature = "";
   ["f_challan","f_pass","f_permit","f_date","f_consigner","f_location",
    "f_destination","f_vehicle","f_mineral","f_qty","f_validity"]
    .forEach(id=>$(id).value="");
@@ -644,13 +680,13 @@ function exportCSV(){
   }
 
   const headers=[
-    "Challan/Serial No","Pass No","Permit No","Challan Date",
+    "S.No.","Challan/Serial No","Pass No","Permit No","Challan Date",
     "Consigner Name","Location","Destination","Vehicle No",
     "Mineral Name","Quantity","Pass Validity","Source","Saved At"
   ];
 
-  const rows=history.map(x=>[
-    x.challan,x.pass,x.permit,x.date,x.consigner,x.location,x.destination,
+  const rows=history.map((x,i)=>[
+    i+1,x.challan,x.pass,x.permit,x.date,x.consigner,x.location,x.destination,
     x.vehicle,x.mineral,x.quantity,x.validity,x.source,x.savedAt
   ]);
 
@@ -670,6 +706,11 @@ function exportCSV(){
 
 window.addEventListener("load",()=>{
   renderHistory();
+
+  // Chrome Extension fills the fields directly. Watch them and auto-save
+  // once Challan + Vehicle + Quantity are all present.
+  window.__lastAutoSavedSignature = "";
+  setInterval(autoSaveIfComplete, 700);
 
   $("challanNo").addEventListener("input",()=>{
     const v=extractChallan($("challanNo").value);
