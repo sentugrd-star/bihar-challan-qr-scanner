@@ -1,1244 +1,524 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sentu Jharkhand Challan</title>
 
-<title>Bihar Sand Challan QR Scanner</title>
-
-<!-- ZXing QR Scanner -->
 <script src="https://unpkg.com/@zxing/browser@0.2.1/umd/zxing-browser.min.js"></script>
 
 <style>
-*{
-    box-sizing:border-box;
+*{box-sizing:border-box}
+:root{
+  --green:#176b3a;--green2:#0f8a48;--bg:#f3f5f4;--card:#fff;
+  --text:#1f2522;--muted:#68716d;--danger:#a00000;--orange:#8a5a00
 }
-
-body{
-    margin:0;
-    padding:12px;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f3f5f4;
-    color:#222;
-}
-
-.container{
-    width:100%;
-    max-width:650px;
-    margin:auto;
-}
-
-h1{
-    text-align:center;
-    color:#176b3a;
-    font-size:25px;
-    margin:8px 0;
-}
-
-.subtitle{
-    text-align:center;
-    color:#555;
-    margin-bottom:12px;
-    font-size:18px;
-}
-
-.camera-box{
-    width:100%;
-    background:#000;
-    border-radius:15px;
-    overflow:hidden;
-    position:relative;
-}
-
-#video{
-    display:block;
-    width:100%;
-    height:390px;
-    object-fit:cover;
-    background:#000;
-}
-
-.scan-frame{
-    position:absolute;
-    width:65%;
-    aspect-ratio:1/1;
-    left:17.5%;
-    top:50%;
-    transform:translateY(-50%);
-    border:4px solid #00ff66;
-    border-radius:15px;
-    pointer-events:none;
-}
-
-.status{
-    margin:12px 0;
-    padding:15px;
-    text-align:center;
-    border-radius:10px;
-    background:#e9eceb;
-    font-weight:bold;
-    font-size:16px;
-    word-break:break-word;
-}
-
-.success{
-    background:#d9f5df;
-    color:#126b2d;
-}
-
-.error{
-    background:#ffe0e0;
-    color:#a00000;
-}
-
-.warning{
-    background:#fff0c2;
-    color:#765700;
-}
-
-.controls{
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:10px;
-    margin:12px 0;
-}
-
-button{
-    border:0;
-    border-radius:9px;
-    padding:14px 20px;
-    background:#176b3a;
-    color:white;
-    font-size:17px;
-    cursor:pointer;
-}
-
-button:disabled{
-    opacity:.5;
-}
-
-button.danger{
-    background:#a00000;
-}
-
-button.secondary{
-    background:#555;
-}
-
-.card{
-    background:white;
-    padding:16px;
-    margin-top:15px;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-
-.card h3{
-    margin-top:0;
-    color:#176b3a;
-    font-size:21px;
-}
-
-#result{
-    word-break:break-all;
-    line-height:1.5;
-    font-size:15px;
-}
-
-.open-link{
-    display:inline-block;
-    margin-top:12px;
-    padding:11px 16px;
-    background:#176b3a;
-    color:white;
-    text-decoration:none;
-    border-radius:8px;
-}
-
-input[type=text]{
-    width:100%;
-    padding:14px;
-    border:1px solid #999;
-    border-radius:8px;
-    font-size:16px;
-}
-
-input[type=file]{
-    width:100%;
-    padding:8px 0;
-}
-
-.small{
-    text-align:center;
-    color:#777;
-    font-size:13px;
-    margin:20px 0;
-}
+body{margin:0;padding:14px;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+.container{max-width:720px;margin:auto}
+header{background:linear-gradient(135deg,#0e5d31,#188448);color:#fff;padding:18px;border-radius:16px;margin-bottom:14px}
+h1{font-size:25px;margin:0;text-align:center}
+.subtitle{text-align:center;margin-top:6px;opacity:.9}
+.card{background:var(--card);padding:16px;margin:12px 0;border-radius:14px;box-shadow:0 2px 9px rgba(0,0,0,.08)}
+.card h2,.card h3{margin:0 0 12px;color:var(--green)}
+.camera{background:#000;border-radius:14px;overflow:hidden;position:relative}
+#video{width:100%;height:380px;display:block;object-fit:cover;background:#000}
+.frame{position:absolute;width:68%;aspect-ratio:1;left:16%;top:50%;transform:translateY(-50%);border:4px solid #00ff66;border-radius:15px;pointer-events:none}
+.status{padding:13px;border-radius:10px;background:#edf0ee;font-weight:bold;text-align:center;margin:12px 0;word-break:break-word}
+.success{background:#d9f5df;color:#126b2d}.error{background:#ffe0e0;color:#a00000}
+.warning{background:#fff0c2;color:#765700}.info{background:#e5f0ff;color:#174c82}
+.controls{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin:11px 0}
+button{border:0;border-radius:9px;padding:13px 17px;background:var(--green);color:#fff;font-size:16px;cursor:pointer}
+button.secondary{background:#555}button.orange{background:#9b6500}button.danger{background:var(--danger)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,select{width:100%;padding:13px;border:1px solid #aeb5b1;border-radius:9px;font-size:16px;margin:5px 0 10px}
+label{font-weight:bold;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}#video{height:330px}}
+.result{font-size:15px;line-height:1.55;word-break:break-word}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#e4f2e9;color:var(--green);font-weight:bold;font-size:12px}
+.small{font-size:13px;color:var(--muted);line-height:1.5}
+.tablewrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left;white-space:nowrap}
+th{background:#eef3ef}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
-<h1>🚚 Bihar Sand Challan</h1>
+<header>
+  <h1>🚚 Sentu Jharkhand Challan</h1>
+  <div class="subtitle">Jharkhand Minerals Portal • QR + Challan Number</div>
+</header>
 
-<div class="subtitle">
-📷 Fast QR Scanner
-</div>
-
-<!-- CAMERA -->
-<div class="camera-box">
-
-    <video
-        id="video"
-        autoplay
-        muted
-        playsinline>
-    </video>
-
-    <div class="scan-frame"></div>
-
-</div>
-
-<!-- STATUS -->
-<div id="status" class="status">
-    📷 Start Camera dabayein.
-</div>
-
-<!-- BUTTONS -->
-<div class="controls">
-
-    <button
-        id="startBtn"
-        onclick="startScanner()">
-        ▶️ Start Camera
-    </button>
-
-    <button
-        id="stopBtn"
-        class="danger"
-        onclick="stopScanner()"
-        disabled>
-        ⏹️ Stop
-    </button>
-
-    <button
-        id="torchBtn"
-        class="secondary"
-        onclick="toggleTorch()"
-        style="display:none">
-        🔦 Torch ON
-    </button>
-
-</div>
-
-<!-- RESULT -->
 <div class="card">
-
-<h3>✅ Scan Result</h3>
-
-<div id="result">
-    QR scan hone ke baad URL yahan dikhega.
+  <span class="badge">🇮🇳 JHARKHAND ONLY</span>
+  <p class="small">
+    QR खराब होने पर नीचे Challan/Serial Number डालकर official Jharkhand
+    verification page खोलें. Government portal CAPTCHA मांगता है, इसलिए
+    CAPTCHA को bypass नहीं किया गया है.
+  </p>
 </div>
 
-</div>
-
-<!-- PHOTO QR -->
 <div class="card">
+  <h2>📷 QR Scanner</h2>
 
-<h3>🖼️ QR Photo Se Scan</h3>
+  <div class="camera">
+    <video id="video" autoplay muted playsinline></video>
+    <div class="frame"></div>
+  </div>
 
-<p>
-QR ki clear photo select karein.
-</p>
+  <div id="status" class="status">📷 Start Camera दबाएँ.</div>
 
-<input
-    type="file"
-    id="qrImage"
-    accept="image/*">
-
+  <div class="controls">
+    <button id="startBtn" onclick="startScanner()">▶️ Start Camera</button>
+    <button id="stopBtn" class="danger" onclick="stopScanner()" disabled>⏹️ Stop</button>
+    <button id="torchBtn" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch</button>
+  </div>
 </div>
 
-<!-- MANUAL -->
 <div class="card">
+  <h2>🔢 Challan / Serial Number</h2>
 
-<h3>🔗 Manual URL</h3>
+  <label>Jharkhand Challan Number / Serial Number</label>
+  <input id="challanNo" type="text" placeholder="Example: F62601331/2" autocomplete="off">
 
-<input
-    type="text"
-    id="manualUrl"
-    placeholder="QR URL yahan paste karein">
+  <div class="controls">
+    <button onclick="verifyJharkhand()">🔍 Verify on Jharkhand Portal</button>
+    <button class="secondary" onclick="copyChallan()">📋 Copy Number</button>
+  </div>
 
-<div class="controls">
+  <div class="small">
+    Verify button official Jharkhand Mines portal खोलता है. वहाँ CAPTCHA भरकर
+    सरकारी result verify करें.
+  </div>
+</div>
 
-<button onclick="manualSubmit()">
-    Submit URL
-</button>
+<div class="card">
+  <h2>📥 Challan Data Import</h2>
+  <div id="importStatus" class="status info">
+    पहले QR scan या Challan Number डालें.
+  </div>
 
+  <div class="grid">
+    <div><label>Challan / Serial No.</label><input id="f_challan"></div>
+    <div><label>Pass No.</label><input id="f_pass"></div>
+    <div><label>Permit No.</label><input id="f_permit"></div>
+    <div><label>Challan Date</label><input id="f_date" placeholder="DD-MM-YYYY"></div>
+    <div><label>Consigner Name</label><input id="f_consigner"></div>
+    <div><label>Generate From / Location</label><input id="f_location"></div>
+    <div><label>Destination</label><input id="f_destination"></div>
+    <div><label>Vehicle No.</label><input id="f_vehicle"></div>
+    <div><label>Mineral Name</label><input id="f_mineral"></div>
+    <div><label>Quantity</label><input id="f_qty"></div>
+    <div><label>Pass Validity</label><input id="f_validity"></div>
+    <div><label>Source</label><input id="f_source" value="Jharkhand Minerals Portal" readonly></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="saveRecord()">💾 Import / Save Data</button>
+    <button class="secondary" onclick="clearForm()">🧹 Clear</button>
+    <button class="orange" onclick="exportCSV()">📊 Export CSV</button>
+  </div>
+
+  <p class="small">
+    Official verification page से values देखकर यहाँ paste/enter करें. इससे
+    website किसी CAPTCHA को bypass नहीं करती और गलत government data invent नहीं करती.
+  </p>
+</div>
+
+<div class="card">
+  <h2>📚 Saved Challans</h2>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Challan</th><th>Date</th><th>Vehicle</th><th>Mineral</th><th>Qty</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody"></tbody>
+    </table>
+  </div>
+  <div class="controls">
+    <button class="danger" onclick="clearHistory()">🗑️ Clear History</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>🔗 Official Jharkhand Portal</h3>
+  <div class="controls">
+    <button onclick="openOfficial()">Open Verify Challan</button>
+  </div>
+  <div class="small">
+    Department of Mines & Geology, Government of Jharkhand.
+  </div>
 </div>
 
 </div>
-
-<div class="small">
-Bihar Sand Challan QR Scanner
-</div>
-
-</div>
-
 
 <script>
+const OFFICIAL_URL =
+  "https://mineralsportal.jharkhand.gov.in/portal/epass/ViewPassDetailsNew.aspx";
 
-/* =========================================================
-   GOOGLE APPS SCRIPT URL
-========================================================= */
-
-const APPS_SCRIPT_URL =
-"https://script.google.com/macros/s/AKfycbwhAG6me0_QyMPKBTVRu_hpzFkrWXRbHR_1RQgNlGvq3Vx7SHSree91OR0BiCZU5TBN/exec";
-
-
-/* =========================================================
-   VARIABLES
-========================================================= */
-
-let codeReader = null;
+let reader = null;
 let controls = null;
+let running = false;
+let torch = false;
+let lastText = "";
 
-let scannerRunning = false;
-let lastScannedText = "";
-let torchOn = false;
+const $ = id => document.getElementById(id);
 
-let saveQueue = [];
-let savingNow = false;
-
-const SAVE_QUEUE_KEY = "bihar_qr_save_queue";
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const video =
-document.getElementById("video");
-
-const statusBox =
-document.getElementById("status");
-
-const resultBox =
-document.getElementById("result");
-
-const startBtn =
-document.getElementById("startBtn");
-
-const stopBtn =
-document.getElementById("stopBtn");
-
-const torchBtn =
-document.getElementById("torchBtn");
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function setStatus(text,type=""){
-
-    statusBox.className =
-        "status " + type;
-
-    statusBox.innerText =
-        text;
+function status(msg, type=""){
+  $("status").className = "status " + type;
+  $("status").innerText = msg;
 }
 
-
-/* =========================================================
-   RESULT
-========================================================= */
-
-function showResult(text){
-
-    const safe =
-        String(text)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;");
-
-    let html =
-        "<b>QR Data:</b><br><br>" +
-        safe;
-
-    if(/^https?:\/\//i.test(text)){
-
-        html +=
-            "<br><br>" +
-            "<a class='open-link' " +
-            "href='" +
-            encodeURI(text) +
-            "' " +
-            "target='_blank'>" +
-            "🔗 Open QR Link" +
-            "</a>";
-    }
-
-    resultBox.innerHTML =
-        html;
+function importStatus(msg, type="info"){
+  $("importStatus").className = "status " + type;
+  $("importStatus").innerText = msg;
 }
-
-
-/* =========================================================
-   BEEP
-========================================================= */
 
 function beep(){
-
-    try{
-
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if(!AudioContext) return;
-
-        const audio =
-            new AudioContext();
-
-        const oscillator =
-            audio.createOscillator();
-
-        const gain =
-            audio.createGain();
-
-        oscillator.frequency.value =
-            1000;
-
-        gain.gain.value =
-            0.08;
-
-        oscillator.connect(gain);
-
-        gain.connect(
-            audio.destination
-        );
-
-        oscillator.start();
-
-        oscillator.stop(
-            audio.currentTime + 0.12
-        );
-
-    }catch(e){}
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    const a = new AC(), o = a.createOscillator(), g = a.createGain();
+    o.frequency.value = 1000; g.gain.value = .08;
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + .12);
+  }catch(e){}
 }
-
-
-/* =========================================================
-   VIBRATION
-========================================================= */
 
 function vibrate(){
-
-    try{
-
-        if(navigator.vibrate){
-
-            navigator.vibrate(
-                [80,40,80]
-            );
-
-        }
-
-    }catch(e){}
+  try{ if(navigator.vibrate) navigator.vibrate([80,40,80]); }catch(e){}
 }
 
+function extractChallan(text){
+  text = String(text || "").trim();
 
-/* =========================================================
-   LOAD SAVED QUEUE
-========================================================= */
+  // Common Jharkhand Form-D serial style such as F62601331/2
+  let m = text.match(/\bF\d{6,12}\/\d{1,6}\b/i);
+  if(m) return m[0].toUpperCase();
 
-try{
-
-    saveQueue =
-        JSON.parse(
-            localStorage.getItem(
-                SAVE_QUEUE_KEY
-            ) || "[]"
-        );
-
-}catch(e){
-
-    saveQueue = [];
-}
-
-
-/* =========================================================
-   SAVE QUEUE
-========================================================= */
-
-function saveQueueStorage(){
-
-    try{
-
-        localStorage.setItem(
-            SAVE_QUEUE_KEY,
-            JSON.stringify(saveQueue)
-        );
-
-    }catch(e){}
-}
-
-
-/* =========================================================
-   SAVE TO GOOGLE SHEET
-========================================================= */
-
-function saveToGoogleSheet(value){
-
-    if(!value) return;
-
-    saveQueue.push({
-        url:value,
-        time:new Date().toISOString()
-    });
-
-    saveQueueStorage();
-
-    processSaveQueue();
-}
-
-
-/* =========================================================
-   PROCESS GOOGLE SHEET QUEUE
-========================================================= */
-
-function processSaveQueue(){
-
-    if(savingNow) return;
-
-    if(saveQueue.length === 0) return;
-
-    savingNow = true;
-
-    const item =
-        saveQueue[0];
-
-    const url =
-        APPS_SCRIPT_URL +
-        "?url=" +
-        encodeURIComponent(
-            item.url
-        );
-
-    let completed = false;
-
-    const img =
-        new Image();
-
-    function success(){
-
-        if(completed) return;
-
-        completed = true;
-
-        saveQueue.shift();
-
-        saveQueueStorage();
-
-        savingNow = false;
-
-        setStatus(
-            "✅ QR Google Sheet me bhej diya gaya.",
-            "success"
-        );
-
-        setTimeout(
-            processSaveQueue,
-            300
-        );
+  // Try URL query parameters
+  try{
+    const u = new URL(text);
+    for(const key of ["challan","challanno","challanNo","serial","serialNo","passno","pass"]){
+      const v = u.searchParams.get(key);
+      if(v) return v.trim();
     }
+  }catch(e){}
 
-    img.onload = function(){
+  // Fallback: keep a short non-URL token
+  if(!/^https?:\/\//i.test(text) && /^[A-Za-z0-9/_-]{4,40}$/.test(text)){
+    return text.toUpperCase();
+  }
 
-        success();
-
-    };
-
-    img.onerror = function(){
-
-        /*
-          Google Apps Script redirect ke
-          karan kabhi-kabhi onerror aa sakta hai.
-          Request server tak pahunch sakti hai.
-        */
-
-        setTimeout(function(){
-
-            if(!completed){
-
-                success();
-
-            }
-
-        },1500);
-
-    };
-
-    img.src =
-        url;
-
-    /*
-      Maximum wait
-    */
-
-    setTimeout(function(){
-
-        if(!completed){
-
-            success();
-
-        }
-
-    },5000);
+  return "";
 }
-
-
-/* =========================================================
-   QR SUCCESS
-========================================================= */
 
 function onQRSuccess(result){
+  let text = "";
+  if(typeof result === "string") text = result.trim();
+  else if(result && result.text) text = result.text.trim();
+  if(!text || text === lastText) return;
 
-    if(!result) return;
+  lastText = text;
+  beep(); vibrate();
 
-    let text = "";
+  const challan = extractChallan(text);
 
-    /*
-      ZXing result object
-    */
+  if(challan){
+    $("challanNo").value = challan;
+    $("f_challan").value = challan;
+    status("✅ Jharkhand Challan Number मिला: " + challan, "success");
+    importStatus("Challan number QR से मिला. अब Verify on Jharkhand Portal दबाएँ.", "success");
+  }else{
+    status("⚠️ QR पढ़ गया, लेकिन Jharkhand Challan Number नहीं मिला.", "warning");
+    importStatus("QR text: " + text, "warning");
+  }
 
-    if(typeof result === "string"){
-
-        text =
-            result.trim();
-
-    }else if(result.text){
-
-        text =
-            result.text.trim();
-
-    }
-
-    if(!text) return;
-
-
-    /*
-      Same QR ko baar-baar
-      immediately save mat karo.
-    */
-
-    if(text === lastScannedText){
-
-        return;
-    }
-
-    lastScannedText =
-        text;
-
-
-    /*
-      SHOW RESULT
-    */
-
-    showResult(text);
-
-
-    /*
-      BEEP
-    */
-
-    beep();
-
-
-    /*
-      VIBRATION
-    */
-
-    vibrate();
-
-
-    /*
-      GOOGLE SHEET
-    */
-
-    saveToGoogleSheet(text);
-
-
-    /*
-      SUCCESS STATUS
-    */
-
-    setStatus(
-        "✅ QR Scan Successful — Google Sheet me save ho raha hai.",
-        "success"
-    );
-
-
-    /*
-      1.5 second baad
-      same QR dobara scan ho sakta hai
-    */
-
-    setTimeout(function(){
-
-        lastScannedText = "";
-
-        if(scannerRunning){
-
-            setStatus(
-                "📷 Next QR Code scan kijiye."
-            );
-
-        }
-
-    },1500);
-
+  setTimeout(()=>{ lastText = ""; }, 1500);
 }
-
-
-/* =========================================================
-   START CAMERA
-========================================================= */
 
 async function startScanner(){
+  if(running) return;
 
-    if(scannerRunning){
-
-        return;
+  try{
+    if(!window.ZXingBrowser) throw new Error("ZXing library load नहीं हुई.");
+    if(location.protocol !== "https:" && location.hostname !== "localhost"){
+      throw new Error("Camera के लिए HTTPS required है.");
     }
 
-    try{
+    status("📷 Rear camera start हो रहा है...");
+    $("startBtn").disabled = true;
 
-        if(!window.ZXingBrowser){
+    if(!reader) reader = new ZXingBrowser.BrowserQRCodeReader();
 
-            throw new Error(
-                "ZXing library load nahi hui."
-            );
-        }
+    const constraints = {
+      video:{
+        facingMode:{ideal:"environment"},
+        width:{ideal:1280},
+        height:{ideal:720}
+      },
+      audio:false
+    };
 
+    controls = await reader.decodeFromConstraints(
+      constraints,
+      $("video"),
+      (result, error)=>{
+        if(result) onQRSuccess(result);
+      }
+    );
 
-        /*
-          HTTPS check
-        */
+    try{ await $("video").play(); }catch(e){}
 
-        if(
-            location.protocol !== "https:" &&
-            location.hostname !== "localhost"
-        ){
+    running = true;
+    $("stopBtn").disabled = false;
+    status("📷 Camera Ready — QR को green box के अंदर रखें.", "success");
+    checkTorch();
 
-            throw new Error(
-                "Camera ke liye HTTPS required hai."
-            );
-
-        }
-
-
-        setStatus(
-            "📷 Rear camera start ho raha hai..."
-        );
-
-        startBtn.disabled =
-            true;
-
-
-        /*
-          Reader create
-        */
-
-        if(!codeReader){
-
-            codeReader =
-                new ZXingBrowser
-                .BrowserQRCodeReader();
-
-        }
-
-
-        /*
-          Camera constraints
-        */
-
-        const constraints = {
-
-            video:{
-
-                facingMode:{
-                    ideal:"environment"
-                },
-
-                width:{
-                    ideal:1280
-                },
-
-                height:{
-                    ideal:720
-                }
-
-            },
-
-            audio:false
-
-        };
-
-
-        /*
-          Start ZXing
-        */
-
-        controls =
-            await codeReader
-            .decodeFromConstraints(
-
-                constraints,
-
-                video,
-
-                function(result,error){
-
-                    if(result){
-
-                        onQRSuccess(
-                            result
-                        );
-
-                    }
-
-                }
-
-            );
-
-
-        /*
-          Video play
-        */
-
-        try{
-
-            await video.play();
-
-        }catch(e){}
-
-
-        scannerRunning =
-            true;
-
-        stopBtn.disabled =
-            false;
-
-
-        setStatus(
-            "📷 Rear Camera Ready — QR ko green box ke andar rakhein.",
-            "success"
-        );
-
-
-        checkTorch();
-
-
-    }catch(error){
-
-        console.error(
-            "CAMERA ERROR:",
-            error
-        );
-
-        scannerRunning =
-            false;
-
-        startBtn.disabled =
-            false;
-
-        stopBtn.disabled =
-            true;
-
-
-        let message =
-            error &&
-            error.message
-            ? error.message
-            : String(error);
-
-
-        setStatus(
-            "❌ Camera start nahi hua: " +
-            message,
-            "error"
-        );
-
-    }
-
+  }catch(e){
+    console.error(e);
+    $("startBtn").disabled = false;
+    $("stopBtn").disabled = true;
+    status("❌ Camera start नहीं हुआ: " + (e.message || e), "error");
+  }
 }
-
-
-/* =========================================================
-   STOP CAMERA
-========================================================= */
 
 function stopScanner(){
-
-    try{
-
-        if(
-            controls &&
-            typeof controls.stop ===
-            "function"
-        ){
-
-            controls.stop();
-
-        }
-
-    }catch(e){
-
-        console.error(e);
-
+  try{
+    if(controls && typeof controls.stop === "function") controls.stop();
+    if(reader) reader.reset();
+    if($("video").srcObject){
+      $("video").srcObject.getTracks().forEach(t=>t.stop());
+      $("video").srcObject = null;
     }
+  }catch(e){}
 
-
-    try{
-
-        if(codeReader){
-
-            codeReader.reset();
-
-        }
-
-    }catch(e){}
-
-
-    try{
-
-        if(video.srcObject){
-
-            video.srcObject
-                .getTracks()
-                .forEach(function(track){
-
-                    track.stop();
-
-                });
-
-            video.srcObject =
-                null;
-        }
-
-    }catch(e){}
-
-
-    controls =
-        null;
-
-    scannerRunning =
-        false;
-
-    torchOn =
-        false;
-
-    startBtn.disabled =
-        false;
-
-    stopBtn.disabled =
-        true;
-
-    torchBtn.style.display =
-        "none";
-
-    setStatus(
-        "⏹️ Camera stopped."
-    );
+  controls = null;
+  running = false;
+  torch = false;
+  $("startBtn").disabled = false;
+  $("stopBtn").disabled = true;
+  $("torchBtn").style.display = "none";
+  status("⏹️ Camera stopped.");
 }
-
-
-/* =========================================================
-   TORCH CHECK
-========================================================= */
 
 function checkTorch(){
-
-    try{
-
-        const stream =
-            video.srcObject;
-
-        if(!stream) return;
-
-        const track =
-            stream.getVideoTracks()[0];
-
-        if(!track) return;
-
-        const capabilities =
-            track.getCapabilities();
-
-        if(
-            capabilities &&
-            capabilities.torch
-        ){
-
-            torchBtn.style.display =
-                "inline-block";
-        }
-
-    }catch(e){}
+  try{
+    const stream = $("video").srcObject;
+    if(!stream) return;
+    const track = stream.getVideoTracks()[0];
+    const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+    if(caps && caps.torch) $("torchBtn").style.display = "inline-block";
+  }catch(e){}
 }
-
-
-/* =========================================================
-   TORCH
-========================================================= */
 
 async function toggleTorch(){
-
-    try{
-
-        const stream =
-            video.srcObject;
-
-        if(!stream) return;
-
-        const track =
-            stream.getVideoTracks()[0];
-
-        if(!track) return;
-
-        const capabilities =
-            track.getCapabilities();
-
-        if(
-            !capabilities ||
-            !capabilities.torch
-        ){
-
-            setStatus(
-                "⚠️ Is camera me Torch support nahi hai.",
-                "warning"
-            );
-
-            return;
-        }
-
-        torchOn =
-            !torchOn;
-
-        await track.applyConstraints({
-
-            advanced:[
-                {
-                    torch:
-                        torchOn
-                }
-            ]
-
-        });
-
-        torchBtn.innerText =
-            torchOn
-            ? "🔦 Torch OFF"
-            : "🔦 Torch ON";
-
-    }catch(error){
-
-        console.error(
-            "Torch error:",
-            error
-        );
-
-        torchOn =
-            false;
-
-        setStatus(
-            "⚠️ Torch support nahi hai.",
-            "warning"
-        );
-
+  try{
+    const stream = $("video").srcObject;
+    if(!stream) return;
+    const track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities();
+    if(!caps.torch){
+      status("⚠️ इस camera में Torch support नहीं है.", "warning");
+      return;
     }
-
+    torch = !torch;
+    await track.applyConstraints({advanced:[{torch}]});
+    $("torchBtn").innerText = torch ? "🔦 Torch OFF" : "🔦 Torch ON";
+  }catch(e){
+    status("⚠️ Torch available नहीं है.", "warning");
+  }
 }
 
+function verifyJharkhand(){
+  const value = $("challanNo").value.trim();
+  if(!value){
+    status("⚠️ पहले Challan / Serial Number डालें.", "warning");
+    return;
+  }
 
-/* =========================================================
-   QR PHOTO SCANNER
-========================================================= */
+  const extracted = extractChallan(value);
+  if(extracted){
+    $("challanNo").value = extracted;
+    $("f_challan").value = extracted;
+  }
 
-document
-.getElementById("qrImage")
-.addEventListener(
-    "change",
-    async function(event){
+  status("🔗 Official Jharkhand Verify Challan page खोला जा रहा है...", "info");
 
-        const file =
-            event.target.files[0];
-
-        if(!file) return;
-
-        setStatus(
-            "🔍 Photo se QR scan ho raha hai..."
-        );
-
-        try{
-
-            if(!window.ZXingBrowser){
-
-                throw new Error(
-                    "ZXing library load nahi hui."
-                );
-
-            }
-
-            if(!codeReader){
-
-                codeReader =
-                    new ZXingBrowser
-                    .BrowserQRCodeReader();
-
-            }
-
-            const imageURL =
-                URL.createObjectURL(
-                    file
-                );
-
-            const result =
-                await codeReader
-                .decodeFromImageUrl(
-                    imageURL
-                );
-
-            URL.revokeObjectURL(
-                imageURL
-            );
-
-            if(result){
-
-                onQRSuccess(
-                    result
-                );
-
-            }else{
-
-                throw new Error(
-                    "QR detect nahi hua."
-                );
-            }
-
-        }catch(error){
-
-            console.error(
-                "PHOTO QR ERROR:",
-                error
-            );
-
-            setStatus(
-                "❌ Photo me QR detect nahi hua. Clear photo try karein.",
-                "error"
-            );
-
-        }
-
-    }
-);
-
-
-/* =========================================================
-   MANUAL URL
-========================================================= */
-
-function manualSubmit(){
-
-    const input =
-        document.getElementById(
-            "manualUrl"
-        );
-
-    const value =
-        input.value.trim();
-
-    if(!value){
-
-        setStatus(
-            "⚠️ QR URL paste kijiye.",
-            "warning"
-        );
-
-        return;
-    }
-
-    showResult(
-        value
-    );
-
-    saveToGoogleSheet(
-        value
-    );
-
-    setStatus(
-        "✅ Manual URL Google Sheet me save ho raha hai.",
-        "success"
-    );
-
-    input.value =
-        "";
+  // Open official government verification page.
+  window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
 }
 
+function openOfficial(){
+  window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
+}
 
-/* =========================================================
-   PAGE LOAD
-========================================================= */
+async function copyChallan(){
+  const v = $("challanNo").value.trim();
+  if(!v){
+    status("⚠️ Challan Number खाली है.", "warning");
+    return;
+  }
+  try{
+    await navigator.clipboard.writeText(v);
+    status("📋 Challan Number copied: " + v, "success");
+  }catch(e){
+    $("challanNo").select();
+    document.execCommand("copy");
+    status("📋 Challan Number copied.", "success");
+  }
+}
 
-window.addEventListener(
-    "load",
-    function(){
+function getForm(){
+  return {
+    challan:$("f_challan").value.trim(),
+    pass:$("f_pass").value.trim(),
+    permit:$("f_permit").value.trim(),
+    date:$("f_date").value.trim(),
+    consigner:$("f_consigner").value.trim(),
+    location:$("f_location").value.trim(),
+    destination:$("f_destination").value.trim(),
+    vehicle:$("f_vehicle").value.trim(),
+    mineral:$("f_mineral").value.trim(),
+    quantity:$("f_qty").value.trim(),
+    validity:$("f_validity").value.trim(),
+    source:"Jharkhand Minerals Portal",
+    savedAt:new Date().toISOString()
+  };
+}
 
-        startBtn.disabled =
-            false;
+function saveRecord(){
+  const data = getForm();
 
-        stopBtn.disabled =
-            true;
+  if(!data.challan){
+    importStatus("⚠️ Challan / Serial Number जरूरी है.", "warning");
+    return;
+  }
 
-        setStatus(
-            "📷 Start Camera dabayein."
-        );
+  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
 
-        /*
-          Pending QR save retry
-        */
+  const existing = history.findIndex(x => x.challan.toUpperCase() === data.challan.toUpperCase());
+  if(existing >= 0) history[existing] = data;
+  else history.unshift(data);
 
-        setTimeout(
-            processSaveQueue,
-            1000
-        );
+  localStorage.setItem("sentu_jharkhand_challans", JSON.stringify(history));
+  renderHistory();
 
-    }
-);
+  importStatus("✅ Challan data successfully saved/imported.", "success");
+}
 
+function renderHistory(){
+  const body = $("historyBody");
+  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
 
-/* =========================================================
-   PAGE CLOSE
-========================================================= */
+  body.innerHTML = "";
 
-window.addEventListener(
-    "beforeunload",
-    function(){
+  if(!history.length){
+    body.innerHTML = '<tr><td colspan="6">No saved challans.</td></tr>';
+    return;
+  }
 
-        try{
+  history.forEach((x,i)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>"+esc(x.challan)+"</td>" +
+      "<td>"+esc(x.date)+"</td>" +
+      "<td>"+esc(x.vehicle)+"</td>" +
+      "<td>"+esc(x.mineral)+"</td>" +
+      "<td>"+esc(x.quantity)+"</td>" +
+      '<td><button class="secondary" onclick="loadRecord('+i+')">Load</button></td>';
+    body.appendChild(tr);
+  });
+}
 
-            stopScanner();
+function loadRecord(i){
+  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
+  const x = history[i];
+  if(!x) return;
 
-        }catch(e){}
+  $("f_challan").value=x.challan||"";
+  $("f_pass").value=x.pass||"";
+  $("f_permit").value=x.permit||"";
+  $("f_date").value=x.date||"";
+  $("f_consigner").value=x.consigner||"";
+  $("f_location").value=x.location||"";
+  $("f_destination").value=x.destination||"";
+  $("f_vehicle").value=x.vehicle||"";
+  $("f_mineral").value=x.mineral||"";
+  $("f_qty").value=x.quantity||"";
+  $("f_validity").value=x.validity||"";
+  importStatus("Loaded: " + x.challan, "success");
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+}
 
-    }
-);
+function clearForm(){
+  ["f_challan","f_pass","f_permit","f_date","f_consigner","f_location",
+   "f_destination","f_vehicle","f_mineral","f_qty","f_validity"]
+   .forEach(id=>$(id).value="");
+  importStatus("Form cleared.", "info");
+}
 
+function clearHistory(){
+  if(!confirm("Saved Jharkhand challan history delete करें?")) return;
+  localStorage.removeItem("sentu_jharkhand_challans");
+  renderHistory();
+}
+
+function esc(v){
+  return String(v ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function exportCSV(){
+  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
+  if(!history.length){
+    importStatus("⚠️ Export करने के लिए कोई data नहीं है.", "warning");
+    return;
+  }
+
+  const headers=[
+    "Challan/Serial No","Pass No","Permit No","Challan Date",
+    "Consigner Name","Location","Destination","Vehicle No",
+    "Mineral Name","Quantity","Pass Validity","Source","Saved At"
+  ];
+
+  const rows=history.map(x=>[
+    x.challan,x.pass,x.permit,x.date,x.consigner,x.location,x.destination,
+    x.vehicle,x.mineral,x.quantity,x.validity,x.source,x.savedAt
+  ]);
+
+  const csv=[
+    headers,
+    ...rows
+  ].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="Jharkhand_Challan_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener("load",()=>{
+  renderHistory();
+  $("challanNo").addEventListener("input",()=>{
+    const v=extractChallan($("challanNo").value);
+    if(v) $("f_challan").value=v;
+  });
+});
+
+window.addEventListener("beforeunload",()=>stopScanner());
 </script>
-
 </body>
 </html>
