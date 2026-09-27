@@ -4,521 +4,205 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sentu Jharkhand Challan</title>
-
 <script src="https://unpkg.com/@zxing/browser@0.2.1/umd/zxing-browser.min.js"></script>
-
 <style>
-*{box-sizing:border-box}
-:root{
-  --green:#176b3a;--green2:#0f8a48;--bg:#f3f5f4;--card:#fff;
-  --text:#1f2522;--muted:#68716d;--danger:#a00000;--orange:#8a5a00
-}
-body{margin:0;padding:14px;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
-.container{max-width:720px;margin:auto}
-header{background:linear-gradient(135deg,#0e5d31,#188448);color:#fff;padding:18px;border-radius:16px;margin-bottom:14px}
-h1{font-size:25px;margin:0;text-align:center}
-.subtitle{text-align:center;margin-top:6px;opacity:.9}
-.card{background:var(--card);padding:16px;margin:12px 0;border-radius:14px;box-shadow:0 2px 9px rgba(0,0,0,.08)}
-.card h2,.card h3{margin:0 0 12px;color:var(--green)}
-.camera{background:#000;border-radius:14px;overflow:hidden;position:relative}
-#video{width:100%;height:380px;display:block;object-fit:cover;background:#000}
-.frame{position:absolute;width:68%;aspect-ratio:1;left:16%;top:50%;transform:translateY(-50%);border:4px solid #00ff66;border-radius:15px;pointer-events:none}
-.status{padding:13px;border-radius:10px;background:#edf0ee;font-weight:bold;text-align:center;margin:12px 0;word-break:break-word}
-.success{background:#d9f5df;color:#126b2d}.error{background:#ffe0e0;color:#a00000}
-.warning{background:#fff0c2;color:#765700}.info{background:#e5f0ff;color:#174c82}
-.controls{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin:11px 0}
-button{border:0;border-radius:9px;padding:13px 17px;background:var(--green);color:#fff;font-size:16px;cursor:pointer}
-button.secondary{background:#555}button.orange{background:#9b6500}button.danger{background:var(--danger)}
-button:disabled{opacity:.5;cursor:not-allowed}
-input,select{width:100%;padding:13px;border:1px solid #aeb5b1;border-radius:9px;font-size:16px;margin:5px 0 10px}
-label{font-weight:bold;font-size:14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:560px){.grid{grid-template-columns:1fr}#video{height:330px}}
-.result{font-size:15px;line-height:1.55;word-break:break-word}
-.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#e4f2e9;color:var(--green);font-weight:bold;font-size:12px}
-.small{font-size:13px;color:var(--muted);line-height:1.5}
-.tablewrap{overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left;white-space:nowrap}
-th{background:#eef3ef}
-.hidden{display:none}
+*{box-sizing:border-box}body{margin:0;padding:14px;background:#f3f5f4;font-family:Arial;color:#202522}
+.container{max-width:760px;margin:auto}.head{background:linear-gradient(135deg,#0b5d31,#188447);color:white;padding:18px;border-radius:16px;text-align:center}
+h1{font-size:25px;margin:0}.sub{margin-top:6px;opacity:.9}.card{background:white;padding:16px;margin:13px 0;border-radius:14px;box-shadow:0 2px 9px #00000012}
+h2{margin:0 0 12px;color:#176b3a;font-size:20px}.small{font-size:13px;color:#68716d;line-height:1.5}
+.status{padding:13px;border-radius:10px;text-align:center;font-weight:bold;margin:10px 0;background:#edf0ee}.success{background:#d9f5df;color:#126b2d}.warning{background:#fff0c2;color:#765700}.error{background:#ffe0e0;color:#a00000}.info{background:#e5f0ff;color:#174c82}
+.camera{background:#000;border-radius:14px;overflow:hidden;position:relative}.camera video{width:100%;height:350px;object-fit:cover}.frame{position:absolute;width:68%;aspect-ratio:1;left:16%;top:50%;transform:translateY(-50%);border:4px solid #00ff66;border-radius:15px}
+input,textarea{width:100%;padding:13px;border:1px solid #aeb5b1;border-radius:9px;font-size:16px;margin:5px 0 10px}textarea{min-height:170px;resize:vertical}
+button{border:0;border-radius:9px;padding:13px 16px;background:#176b3a;color:#fff;font-size:16px;cursor:pointer;margin:4px}button.secondary{background:#555}button.orange{background:#986100}button.danger{background:#a00000}button:disabled{opacity:.5}
+.controls{text-align:center;margin:8px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}@media(max-width:560px){.grid{grid-template-columns:1fr}.camera video{height:320px}}
+label{font-weight:bold;font-size:14px}.badge{display:inline-block;background:#e4f2e9;color:#176b3a;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+.table{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;border-bottom:1px solid #ddd;text-align:left;white-space:nowrap}th{background:#eef3ef}
 </style>
 </head>
-
 <body>
 <div class="container">
-
-<header>
-  <h1>🚚 Sentu Jharkhand Challan</h1>
-  <div class="subtitle">Jharkhand Minerals Portal • QR + Challan Number</div>
-</header>
+<div class="head"><h1>🚚 Sentu Jharkhand Challan</h1><div class="sub">Jharkhand Minerals Portal • QR + Challan Import</div></div>
 
 <div class="card">
-  <span class="badge">🇮🇳 JHARKHAND ONLY</span>
-  <p class="small">
-    QR खराब होने पर नीचे Challan/Serial Number डालकर official Jharkhand
-    verification page खोलें. Government portal CAPTCHA मांगता है, इसलिए
-    CAPTCHA को bypass नहीं किया गया है.
-  </p>
+<span class="badge">🇮🇳 JHARKHAND ONLY</span>
+<p class="small">QR खराब हो तो Challan Number डालें. Official portal पर CAPTCHA भरें. Verification के बाद portal के result text को copy करके नीचे paste करें; Sentu fields अपने-आप भर देगा.</p>
 </div>
 
 <div class="card">
-  <h2>📷 QR Scanner</h2>
-
-  <div class="camera">
-    <video id="video" autoplay muted playsinline></video>
-    <div class="frame"></div>
-  </div>
-
-  <div id="status" class="status">📷 Start Camera दबाएँ.</div>
-
-  <div class="controls">
-    <button id="startBtn" onclick="startScanner()">▶️ Start Camera</button>
-    <button id="stopBtn" class="danger" onclick="stopScanner()" disabled>⏹️ Stop</button>
-    <button id="torchBtn" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch</button>
-  </div>
+<h2>📷 QR Scanner</h2>
+<div class="camera"><video id="video" autoplay muted playsinline></video><div class="frame"></div></div>
+<div id="status" class="status">📷 Start Camera दबाएँ.</div>
+<div class="controls">
+<button id="start" onclick="startScanner()">▶️ Start Camera</button>
+<button id="stop" class="danger" onclick="stopScanner()" disabled>⏹️ Stop</button>
+<button id="torch" class="secondary" onclick="toggleTorch()" style="display:none">🔦 Torch</button>
+</div>
 </div>
 
 <div class="card">
-  <h2>🔢 Challan / Serial Number</h2>
-
-  <label>Jharkhand Challan Number / Serial Number</label>
-  <input id="challanNo" type="text" placeholder="Example: F62601331/2" autocomplete="off">
-
-  <div class="controls">
-    <button onclick="verifyJharkhand()">🔍 Verify on Jharkhand Portal</button>
-    <button class="secondary" onclick="copyChallan()">📋 Copy Number</button>
-  </div>
-
-  <div class="small">
-    Verify button official Jharkhand Mines portal खोलता है. वहाँ CAPTCHA भरकर
-    सरकारी result verify करें.
-  </div>
+<h2>🔢 Challan / Serial Number</h2>
+<label>Challan Number / Serial Number</label>
+<input id="challan" placeholder="Example: F62601331/2" autocomplete="off">
+<div class="controls">
+<button onclick="openPortal()">🔍 Verify on Jharkhand Portal</button>
+<button class="secondary" onclick="copyChallan()">📋 Copy Number</button>
+</div>
+<p class="small">Portal: Department of Mines & Geology, Government of Jharkhand.</p>
 </div>
 
 <div class="card">
-  <h2>📥 Challan Data Import</h2>
-  <div id="importStatus" class="status info">
-    पहले QR scan या Challan Number डालें.
-  </div>
-
-  <div class="grid">
-    <div><label>Challan / Serial No.</label><input id="f_challan"></div>
-    <div><label>Pass No.</label><input id="f_pass"></div>
-    <div><label>Permit No.</label><input id="f_permit"></div>
-    <div><label>Challan Date</label><input id="f_date" placeholder="DD-MM-YYYY"></div>
-    <div><label>Consigner Name</label><input id="f_consigner"></div>
-    <div><label>Generate From / Location</label><input id="f_location"></div>
-    <div><label>Destination</label><input id="f_destination"></div>
-    <div><label>Vehicle No.</label><input id="f_vehicle"></div>
-    <div><label>Mineral Name</label><input id="f_mineral"></div>
-    <div><label>Quantity</label><input id="f_qty"></div>
-    <div><label>Pass Validity</label><input id="f_validity"></div>
-    <div><label>Source</label><input id="f_source" value="Jharkhand Minerals Portal" readonly></div>
-  </div>
-
-  <div class="controls">
-    <button onclick="saveRecord()">💾 Import / Save Data</button>
-    <button class="secondary" onclick="clearForm()">🧹 Clear</button>
-    <button class="orange" onclick="exportCSV()">📊 Export CSV</button>
-  </div>
-
-  <p class="small">
-    Official verification page से values देखकर यहाँ paste/enter करें. इससे
-    website किसी CAPTCHA को bypass नहीं करती और गलत government data invent नहीं करती.
-  </p>
+<h2>📋 Step 2 — Result Copy करके यहाँ Paste करें</h2>
+<p class="small"><b>Portal पर verification के बाद:</b> result वाला पूरा text select/copy करें और नीचे paste करें.</p>
+<textarea id="portalText" placeholder="Paste Jharkhand portal result here..."></textarea>
+<div class="controls">
+<button onclick="parsePortalText()">⚡ Auto Import From Result</button>
+<button class="secondary" onclick="clearPaste()">🧹 Clear</button>
+</div>
+<div id="importStatus" class="status info">अभी कोई result import नहीं हुआ.</div>
 </div>
 
 <div class="card">
-  <h2>📚 Saved Challans</h2>
-  <div class="tablewrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Challan</th><th>Date</th><th>Vehicle</th><th>Mineral</th><th>Qty</th><th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="historyBody"></tbody>
-    </table>
-  </div>
-  <div class="controls">
-    <button class="danger" onclick="clearHistory()">🗑️ Clear History</button>
-  </div>
+<h2>📥 Challan Data</h2>
+<div class="grid">
+<div><label>Challan / Serial No.</label><input id="f_challan"></div>
+<div><label>Pass No.</label><input id="f_pass"></div>
+<div><label>Permit No.</label><input id="f_permit"></div>
+<div><label>Challan Date</label><input id="f_date"></div>
+<div><label>Consigner Name</label><input id="f_consigner"></div>
+<div><label>Challan Generate From</label><input id="f_generate"></div>
+<div><label>Location</label><input id="f_location"></div>
+<div><label>Destination</label><input id="f_destination"></div>
+<div><label>Vehicle No.</label><input id="f_vehicle"></div>
+<div><label>Mineral Name</label><input id="f_mineral"></div>
+<div><label>Quantity</label><input id="f_quantity"></div>
+<div><label>Pass Validity</label><input id="f_validity"></div>
+</div>
+<div class="controls">
+<button onclick="saveData()">💾 Save / Import</button>
+<button class="orange" onclick="exportCSV()">📊 Export CSV</button>
+<button class="secondary" onclick="clearForm()">🧹 Clear Form</button>
+</div>
 </div>
 
 <div class="card">
-  <h3>🔗 Official Jharkhand Portal</h3>
-  <div class="controls">
-    <button onclick="openOfficial()">Open Verify Challan</button>
-  </div>
-  <div class="small">
-    Department of Mines & Geology, Government of Jharkhand.
-  </div>
+<h2>📚 Saved Challans</h2>
+<div class="table"><table><thead><tr><th>Challan</th><th>Date</th><th>Vehicle</th><th>Mineral</th><th>Qty</th><th></th></tr></thead><tbody id="history"></tbody></table></div>
+<button class="danger" onclick="clearHistory()">🗑️ Clear History</button>
 </div>
-
 </div>
 
 <script>
-const OFFICIAL_URL =
-  "https://mineralsportal.jharkhand.gov.in/portal/epass/ViewPassDetailsNew.aspx";
+const PORTAL="https://mineralsportal.jharkhand.gov.in/portal/epass/ViewPassDetailsNew.aspx";
+let reader=null, controls=null, running=false, torch=false, last="";
+const $=id=>document.getElementById(id);
 
-let reader = null;
-let controls = null;
-let running = false;
-let torch = false;
-let lastText = "";
+function setStatus(t,c=""){ $("status").className="status "+c; $("status").innerText=t; }
+function setImport(t,c="info"){ $("importStatus").className="status "+c; $("importStatus").innerText=t; }
+function beep(){try{let A=window.AudioContext||window.webkitAudioContext;if(!A)return;let a=new A,o=a.createOscillator(),g=a.createGain();o.frequency.value=1000;g.gain.value=.08;o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+.12)}catch(e){}}
+function vibrate(){try{navigator.vibrate&&navigator.vibrate([80,40,80])}catch(e){}}
 
-const $ = id => document.getElementById(id);
-
-function status(msg, type=""){
-  $("status").className = "status " + type;
-  $("status").innerText = msg;
+function extractChallan(s){
+ s=String(s||"").trim();
+ let m=s.match(/\bF\d{6,12}\/\d{1,6}\b/i); if(m)return m[0].toUpperCase();
+ try{let u=new URL(s);for(let k of ["challan","challanno","challanNo","serial","serialNo","passno","pass"]){let v=u.searchParams.get(k);if(v)return v.trim()}}catch(e){}
+ if(!/^https?:\/\//i.test(s)&&/^[A-Za-z0-9/_-]{4,40}$/.test(s))return s.toUpperCase();
+ return "";
 }
-
-function importStatus(msg, type="info"){
-  $("importStatus").className = "status " + type;
-  $("importStatus").innerText = msg;
+function qrSuccess(r){
+ let t=typeof r==="string"?r.trim():(r&&r.text?r.text.trim():"");if(!t||t===last)return;last=t;beep();vibrate();
+ let c=extractChallan(t);
+ if(c){$("challan").value=c;$("f_challan").value=c;setStatus("✅ Challan Number मिला: "+c,"success");setImport("अब Verify करें, फिर result copy करके नीचे paste करें.","success")}
+ else setStatus("⚠️ QR मिला लेकिन Challan Number नहीं मिला.","warning");
+ setTimeout(()=>last="",1500);
 }
-
-function beep(){
-  try{
-    const AC = window.AudioContext || window.webkitAudioContext;
-    if(!AC) return;
-    const a = new AC(), o = a.createOscillator(), g = a.createGain();
-    o.frequency.value = 1000; g.gain.value = .08;
-    o.connect(g); g.connect(a.destination);
-    o.start(); o.stop(a.currentTime + .12);
-  }catch(e){}
-}
-
-function vibrate(){
-  try{ if(navigator.vibrate) navigator.vibrate([80,40,80]); }catch(e){}
-}
-
-function extractChallan(text){
-  text = String(text || "").trim();
-
-  // Common Jharkhand Form-D serial style such as F62601331/2
-  let m = text.match(/\bF\d{6,12}\/\d{1,6}\b/i);
-  if(m) return m[0].toUpperCase();
-
-  // Try URL query parameters
-  try{
-    const u = new URL(text);
-    for(const key of ["challan","challanno","challanNo","serial","serialNo","passno","pass"]){
-      const v = u.searchParams.get(key);
-      if(v) return v.trim();
-    }
-  }catch(e){}
-
-  // Fallback: keep a short non-URL token
-  if(!/^https?:\/\//i.test(text) && /^[A-Za-z0-9/_-]{4,40}$/.test(text)){
-    return text.toUpperCase();
-  }
-
-  return "";
-}
-
-function onQRSuccess(result){
-  let text = "";
-  if(typeof result === "string") text = result.trim();
-  else if(result && result.text) text = result.text.trim();
-  if(!text || text === lastText) return;
-
-  lastText = text;
-  beep(); vibrate();
-
-  const challan = extractChallan(text);
-
-  if(challan){
-    $("challanNo").value = challan;
-    $("f_challan").value = challan;
-    status("✅ Jharkhand Challan Number मिला: " + challan, "success");
-    importStatus("Challan number QR से मिला. अब Verify on Jharkhand Portal दबाएँ.", "success");
-  }else{
-    status("⚠️ QR पढ़ गया, लेकिन Jharkhand Challan Number नहीं मिला.", "warning");
-    importStatus("QR text: " + text, "warning");
-  }
-
-  setTimeout(()=>{ lastText = ""; }, 1500);
-}
-
 async function startScanner(){
-  if(running) return;
-
-  try{
-    if(!window.ZXingBrowser) throw new Error("ZXing library load नहीं हुई.");
-    if(location.protocol !== "https:" && location.hostname !== "localhost"){
-      throw new Error("Camera के लिए HTTPS required है.");
-    }
-
-    status("📷 Rear camera start हो रहा है...");
-    $("startBtn").disabled = true;
-
-    if(!reader) reader = new ZXingBrowser.BrowserQRCodeReader();
-
-    const constraints = {
-      video:{
-        facingMode:{ideal:"environment"},
-        width:{ideal:1280},
-        height:{ideal:720}
-      },
-      audio:false
-    };
-
-    controls = await reader.decodeFromConstraints(
-      constraints,
-      $("video"),
-      (result, error)=>{
-        if(result) onQRSuccess(result);
-      }
-    );
-
-    try{ await $("video").play(); }catch(e){}
-
-    running = true;
-    $("stopBtn").disabled = false;
-    status("📷 Camera Ready — QR को green box के अंदर रखें.", "success");
-    checkTorch();
-
-  }catch(e){
-    console.error(e);
-    $("startBtn").disabled = false;
-    $("stopBtn").disabled = true;
-    status("❌ Camera start नहीं हुआ: " + (e.message || e), "error");
-  }
+ if(running)return;
+ try{
+  if(!window.ZXingBrowser)throw Error("ZXing library load नहीं हुई.");
+  if(location.protocol!=="https:"&&location.hostname!=="localhost")throw Error("Camera के लिए HTTPS required है.");
+  $("start").disabled=true;setStatus("📷 Rear camera start हो रहा है...");
+  if(!reader)reader=new ZXingBrowser.BrowserQRCodeReader();
+  controls=await reader.decodeFromConstraints({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false},$("video"),(r,e)=>{if(r)qrSuccess(r)});
+  try{await $("video").play()}catch(e){}
+  running=true;$("stop").disabled=false;setStatus("📷 Camera Ready — QR को green box में रखें.","success");checkTorch();
+ }catch(e){$("start").disabled=false;$("stop").disabled=true;setStatus("❌ Camera start नहीं हुआ: "+(e.message||e),"error")}
 }
+function stopScanner(){try{controls&&controls.stop&&controls.stop();reader&&reader.reset();if($("video").srcObject){$("video").srcObject.getTracks().forEach(t=>t.stop());$("video").srcObject=null}}catch(e){}controls=null;running=false;torch=false;$("start").disabled=false;$("stop").disabled=true;$("torch").style.display="none";setStatus("⏹️ Camera stopped.")}
+function checkTorch(){try{let s=$("video").srcObject,t=s&&s.getVideoTracks()[0],c=t&&t.getCapabilities?t.getCapabilities():{};if(c.torch)$("torch").style.display="inline-block"}catch(e){}}
+async function toggleTorch(){try{let t=$("video").srcObject.getVideoTracks()[0],c=t.getCapabilities();if(!c.torch)return;torch=!torch;await t.applyConstraints({advanced:[{torch}]});$("torch").innerText=torch?"🔦 Torch OFF":"🔦 Torch ON"}catch(e){setStatus("⚠️ Torch support नहीं है.","warning")}}
 
-function stopScanner(){
-  try{
-    if(controls && typeof controls.stop === "function") controls.stop();
-    if(reader) reader.reset();
-    if($("video").srcObject){
-      $("video").srcObject.getTracks().forEach(t=>t.stop());
-      $("video").srcObject = null;
-    }
-  }catch(e){}
-
-  controls = null;
-  running = false;
-  torch = false;
-  $("startBtn").disabled = false;
-  $("stopBtn").disabled = true;
-  $("torchBtn").style.display = "none";
-  status("⏹️ Camera stopped.");
+function openPortal(){
+ let c=$("challan").value.trim();if(!c){setStatus("⚠️ पहले Challan Number डालें.","warning");return}
+ $("f_challan").value=extractChallan(c)||c;
+ window.open(PORTAL,"_blank","noopener,noreferrer");
+ setStatus("🔗 Official Jharkhand portal खुल गया. Verification के बाद result copy करें.","info");
 }
+async function copyChallan(){let v=$("challan").value.trim();if(!v)return;try{await navigator.clipboard.writeText(v);setStatus("📋 Challan Number copied.","success")}catch(e){$("challan").select();document.execCommand("copy")}}
 
-function checkTorch(){
-  try{
-    const stream = $("video").srcObject;
-    if(!stream) return;
-    const track = stream.getVideoTracks()[0];
-    const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-    if(caps && caps.torch) $("torchBtn").style.display = "inline-block";
-  }catch(e){}
+function normalize(s){return String(s||"").replace(/\u00a0/g," ").replace(/\r/g,"").trim()}
+function getAfter(text,label,nextLabels){
+ let i=text.toLowerCase().indexOf(label.toLowerCase());if(i<0)return "";
+ let rest=text.slice(i+label.length);
+ let cut=rest.length;
+ for(let n of nextLabels){let p=rest.toLowerCase().indexOf(n.toLowerCase());if(p>=0&&p<cut)cut=p}
+ return rest.slice(0,cut).replace(/^[\s:|-]+|[\s:|-]+$/g,"").replace(/\s+/g," ").trim();
 }
-
-async function toggleTorch(){
-  try{
-    const stream = $("video").srcObject;
-    if(!stream) return;
-    const track = stream.getVideoTracks()[0];
-    const caps = track.getCapabilities();
-    if(!caps.torch){
-      status("⚠️ इस camera में Torch support नहीं है.", "warning");
-      return;
-    }
-    torch = !torch;
-    await track.applyConstraints({advanced:[{torch}]});
-    $("torchBtn").innerText = torch ? "🔦 Torch OFF" : "🔦 Torch ON";
-  }catch(e){
-    status("⚠️ Torch available नहीं है.", "warning");
-  }
+function parsePortalText(){
+ let text=normalize($("portalText").value);
+ if(!text){setImport("⚠️ पहले portal result paste करें.","warning");return}
+ let labels=["Pass No.","Permit No.","Challan Date","Consigner Name","Challan Generate from","Location","Destination","Vehicle No.","Mineral Name","Quantity","Pass Validity"];
+ let clean=text.replace(/\n+/g,"\n");
+ function val(label){
+   let line=clean.split("\n").findIndex(x=>x.trim().toLowerCase()===label.toLowerCase());
+   if(line>=0){
+     let lines=clean.split("\n"), v=(lines[line+1]||"").trim();
+     if(v && v.toUpperCase()!=="NA")return v;
+   }
+   return getAfter(clean,label,labels.filter(x=>x!==label));
+ }
+ let c=extractChallan($("challan").value)||extractChallan(text);
+ if(c)$("f_challan").value=c;
+ $("f_pass").value=val("Pass No.");
+ $("f_permit").value=val("Permit No.");
+ $("f_date").value=val("Challan Date");
+ $("f_consigner").value=val("Consigner Name");
+ $("f_generate").value=val("Challan Generate from");
+ $("f_location").value=val("Location");
+ $("f_destination").value=val("Destination");
+ $("f_vehicle").value=val("Vehicle No.");
+ $("f_mineral").value=val("Mineral Name");
+ $("f_quantity").value=val("Quantity");
+ $("f_validity").value=val("Pass Validity");
+ let filled=["f_challan","f_pass","f_permit","f_date","f_consigner","f_generate","f_location","f_destination","f_vehicle","f_mineral","f_quantity","f_validity"].filter(id=>$(id).value).length;
+ setImport("✅ "+filled+" fields imported. कृपया values check करके Save / Import दबाएँ.","success");
 }
-
-function verifyJharkhand(){
-  const value = $("challanNo").value.trim();
-  if(!value){
-    status("⚠️ पहले Challan / Serial Number डालें.", "warning");
-    return;
-  }
-
-  const extracted = extractChallan(value);
-  if(extracted){
-    $("challanNo").value = extracted;
-    $("f_challan").value = extracted;
-  }
-
-  status("🔗 Official Jharkhand Verify Challan page खोला जा रहा है...", "info");
-
-  // Open official government verification page.
-  window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
+function clearPaste(){$("portalText").value="";setImport("Paste box cleared.","info")}
+function data(){
+ return {challan:$("f_challan").value.trim(),pass:$("f_pass").value.trim(),permit:$("f_permit").value.trim(),date:$("f_date").value.trim(),consigner:$("f_consigner").value.trim(),generate:$("f_generate").value.trim(),location:$("f_location").value.trim(),destination:$("f_destination").value.trim(),vehicle:$("f_vehicle").value.trim(),mineral:$("f_mineral").value.trim(),quantity:$("f_quantity").value.trim(),validity:$("f_validity").value.trim(),savedAt:new Date().toISOString()};
 }
-
-function openOfficial(){
-  window.open(OFFICIAL_URL, "_blank", "noopener,noreferrer");
+function saveData(){
+ let d=data();if(!d.challan){setImport("⚠️ Challan Number जरूरी है.","warning");return}
+ let h=JSON.parse(localStorage.getItem("sentu_jharkhand")||"[]"),i=h.findIndex(x=>x.challan.toUpperCase()===d.challan.toUpperCase());if(i>=0)h[i]=d;else h.unshift(d);
+ localStorage.setItem("sentu_jharkhand",JSON.stringify(h));render();setImport("✅ Challan data saved/imported.","success");
 }
-
-async function copyChallan(){
-  const v = $("challanNo").value.trim();
-  if(!v){
-    status("⚠️ Challan Number खाली है.", "warning");
-    return;
-  }
-  try{
-    await navigator.clipboard.writeText(v);
-    status("📋 Challan Number copied: " + v, "success");
-  }catch(e){
-    $("challanNo").select();
-    document.execCommand("copy");
-    status("📋 Challan Number copied.", "success");
-  }
+function render(){
+ let h=JSON.parse(localStorage.getItem("sentu_jharkhand")||"[]"),b=$("history");b.innerHTML="";
+ if(!h.length){b.innerHTML="<tr><td colspan='6'>No saved challans.</td></tr>";return}
+ h.forEach((x,i)=>{let tr=document.createElement("tr");tr.innerHTML="<td>"+esc(x.challan)+"</td><td>"+esc(x.date)+"</td><td>"+esc(x.vehicle)+"</td><td>"+esc(x.mineral)+"</td><td>"+esc(x.quantity)+"</td><td><button class='secondary' onclick='load("+i+")'>Load</button></td>";b.appendChild(tr)})
 }
-
-function getForm(){
-  return {
-    challan:$("f_challan").value.trim(),
-    pass:$("f_pass").value.trim(),
-    permit:$("f_permit").value.trim(),
-    date:$("f_date").value.trim(),
-    consigner:$("f_consigner").value.trim(),
-    location:$("f_location").value.trim(),
-    destination:$("f_destination").value.trim(),
-    vehicle:$("f_vehicle").value.trim(),
-    mineral:$("f_mineral").value.trim(),
-    quantity:$("f_qty").value.trim(),
-    validity:$("f_validity").value.trim(),
-    source:"Jharkhand Minerals Portal",
-    savedAt:new Date().toISOString()
-  };
-}
-
-function saveRecord(){
-  const data = getForm();
-
-  if(!data.challan){
-    importStatus("⚠️ Challan / Serial Number जरूरी है.", "warning");
-    return;
-  }
-
-  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
-
-  const existing = history.findIndex(x => x.challan.toUpperCase() === data.challan.toUpperCase());
-  if(existing >= 0) history[existing] = data;
-  else history.unshift(data);
-
-  localStorage.setItem("sentu_jharkhand_challans", JSON.stringify(history));
-  renderHistory();
-
-  importStatus("✅ Challan data successfully saved/imported.", "success");
-}
-
-function renderHistory(){
-  const body = $("historyBody");
-  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
-
-  body.innerHTML = "";
-
-  if(!history.length){
-    body.innerHTML = '<tr><td colspan="6">No saved challans.</td></tr>';
-    return;
-  }
-
-  history.forEach((x,i)=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML =
-      "<td>"+esc(x.challan)+"</td>" +
-      "<td>"+esc(x.date)+"</td>" +
-      "<td>"+esc(x.vehicle)+"</td>" +
-      "<td>"+esc(x.mineral)+"</td>" +
-      "<td>"+esc(x.quantity)+"</td>" +
-      '<td><button class="secondary" onclick="loadRecord('+i+')">Load</button></td>';
-    body.appendChild(tr);
-  });
-}
-
-function loadRecord(i){
-  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
-  const x = history[i];
-  if(!x) return;
-
-  $("f_challan").value=x.challan||"";
-  $("f_pass").value=x.pass||"";
-  $("f_permit").value=x.permit||"";
-  $("f_date").value=x.date||"";
-  $("f_consigner").value=x.consigner||"";
-  $("f_location").value=x.location||"";
-  $("f_destination").value=x.destination||"";
-  $("f_vehicle").value=x.vehicle||"";
-  $("f_mineral").value=x.mineral||"";
-  $("f_qty").value=x.quantity||"";
-  $("f_validity").value=x.validity||"";
-  importStatus("Loaded: " + x.challan, "success");
-  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
-}
-
-function clearForm(){
-  ["f_challan","f_pass","f_permit","f_date","f_consigner","f_location",
-   "f_destination","f_vehicle","f_mineral","f_qty","f_validity"]
-   .forEach(id=>$(id).value="");
-  importStatus("Form cleared.", "info");
-}
-
-function clearHistory(){
-  if(!confirm("Saved Jharkhand challan history delete करें?")) return;
-  localStorage.removeItem("sentu_jharkhand_challans");
-  renderHistory();
-}
-
-function esc(v){
-  return String(v ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
-
+function load(i){let x=JSON.parse(localStorage.getItem("sentu_jharkhand")||"[]")[i];if(!x)return;let m={f_challan:"challan",f_pass:"pass",f_permit:"permit",f_date:"date",f_consigner:"consigner",f_generate:"generate",f_location:"location",f_destination:"destination",f_vehicle:"vehicle",f_mineral:"mineral",f_quantity:"quantity",f_validity:"validity"};for(let k in m)$(k).value=x[m[k]]||"";setImport("Loaded "+x.challan,"success")}
+function clearForm(){["f_challan","f_pass","f_permit","f_date","f_consigner","f_generate","f_location","f_destination","f_vehicle","f_mineral","f_quantity","f_validity"].forEach(x=>$(x).value="");setImport("Form cleared.","info")}
+function clearHistory(){if(confirm("Saved history delete करें?")){localStorage.removeItem("sentu_jharkhand");render()}}
+function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
 function exportCSV(){
-  const history = JSON.parse(localStorage.getItem("sentu_jharkhand_challans") || "[]");
-  if(!history.length){
-    importStatus("⚠️ Export करने के लिए कोई data नहीं है.", "warning");
-    return;
-  }
-
-  const headers=[
-    "Challan/Serial No","Pass No","Permit No","Challan Date",
-    "Consigner Name","Location","Destination","Vehicle No",
-    "Mineral Name","Quantity","Pass Validity","Source","Saved At"
-  ];
-
-  const rows=history.map(x=>[
-    x.challan,x.pass,x.permit,x.date,x.consigner,x.location,x.destination,
-    x.vehicle,x.mineral,x.quantity,x.validity,x.source,x.savedAt
-  ]);
-
-  const csv=[
-    headers,
-    ...rows
-  ].map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
-
-  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="Jharkhand_Challan_"+new Date().toISOString().slice(0,10)+".csv";
-  a.click();
-  URL.revokeObjectURL(url);
+ let h=JSON.parse(localStorage.getItem("sentu_jharkhand")||"[]");if(!h.length){setImport("⚠️ कोई saved data नहीं.","warning");return}
+ let heads=["Challan/Serial No","Pass No","Permit No","Challan Date","Consigner Name","Challan Generate From","Location","Destination","Vehicle No","Mineral Name","Quantity","Pass Validity","Saved At"];
+ let rows=h.map(x=>[x.challan,x.pass,x.permit,x.date,x.consigner,x.generate,x.location,x.destination,x.vehicle,x.mineral,x.quantity,x.validity,x.savedAt]);
+ let csv=[heads,...rows].map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+ let u=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv"})),a=document.createElement("a");a.href=u;a.download="Jharkhand_Challan_"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(u);
 }
-
-window.addEventListener("load",()=>{
-  renderHistory();
-  $("challanNo").addEventListener("input",()=>{
-    const v=extractChallan($("challanNo").value);
-    if(v) $("f_challan").value=v;
-  });
-});
-
-window.addEventListener("beforeunload",()=>stopScanner());
+$("challan").addEventListener("input",()=>{let c=extractChallan($("challan").value);if(c)$("f_challan").value=c});
+window.addEventListener("load",render);window.addEventListener("beforeunload",stopScanner);
 </script>
 </body>
 </html>
