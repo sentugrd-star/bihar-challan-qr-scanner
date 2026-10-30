@@ -41,5 +41,42 @@ function nh(v){return String(v??"").toLowerCase().trim().replace(/[\s_\-/]+/g,""
 function pick(r,aliases){for(let k of Object.keys(r))if(aliases.map(nh).includes(nh(k)))return String(r[k]??"").trim();return ""}
 async function importExcel(e){let file=e.target.files?.[0];e.target.value="";if(!file)return;if(!window.XLSX)return status("Excel library load nahi hui.","error");try{let wb=XLSX.read(await file.arrayBuffer(),{type:"array"}),sheet=wb.Sheets[wb.SheetNames[0]],data=XLSX.utils.sheet_to_json(sheet,{defval:""}),added=0,updated=0;for(let r of data){let d={challan:pick(r,["Challan / Serial No","Challan","Serial No","Serial Number"]),pass:pick(r,["Pass No"]),permit:pick(r,["Permit No"]),date:pick(r,["Challan Date","Date"]),consigner:pick(r,["Consigner Name","Consignor Name","Consigner"]),location:pick(r,["Location","Generate From"]),destination:pick(r,["Destination"]),vehicle:pick(r,["Vehicle No","Vehicle Number","Vehicle"]),mineral:pick(r,["Mineral Name","Mineral"]),quantity:pick(r,["Quantity","Qty"]),validity:pick(r,["Pass Validity","Validity"]),verificationStatus:pick(r,["Verification Status"])||"not_verified",source:"Jharkhand Minerals Portal",updatedAt:new Date().toISOString()};if(!key(d.challan))continue;let old=getHistory().some(x=>key(x.challan)===key(d.challan));saveToStorage(d);old?updated++:added++}renderHistory();status(`Import complete: ${added} new, ${updated} updated. Duplicate entries merge ho gayi.`,"success")}catch(err){status("Import failed: "+err.message,"error")}}
 function clearHistory(){if(!confirm("Is browser ki poori saved history delete karni hai? Pehle Excel backup le lein."))return;localStorage.removeItem(KEY);renderHistory();status("Is browser ki history delete ho gayi.","success")}
-window.addEventListener("load",renderHistory);
+
+// Chrome extension ke input/change events aur delayed field updates par automatic save.
+let autoSaveTimer=null;
+let lastAutoSavedSignature="";
+function autoSaveFromExtension(){
+  const d=getForm();
+  if(!key(d.challan)||!d.vehicle||!d.quantity)return;
+  const signature=JSON.stringify({
+    challan:d.challan,pass:d.pass,permit:d.permit,date:d.date,
+    consigner:d.consigner,location:d.location,destination:d.destination,
+    vehicle:d.vehicle,mineral:d.mineral,quantity:d.quantity,
+    validity:d.validity,verificationStatus:d.verificationStatus
+  });
+  if(signature===lastAutoSavedSignature)return;
+  try{
+    const updated=saveToStorage(d);
+    lastAutoSavedSignature=signature;
+    status(updated
+      ?"Extension data auto-saved: existing challan updated."
+      :"Extension data automatically saved to history.","success");
+  }catch(e){
+    status("Auto-save nahi hua. Browser storage check karein: "+e.message,"error");
+  }
+}
+function scheduleAutoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer=setTimeout(autoSaveFromExtension,800);
+}
+["f_challan","f_pass","f_permit","f_date","f_consigner","f_location",
+ "f_destination","f_vehicle","f_mineral","f_qty","f_validity","f_verified"]
+.forEach(id=>{
+  $(id).addEventListener("input",scheduleAutoSave);
+  $(id).addEventListener("change",scheduleAutoSave);
+});
+window.addEventListener("load",()=>{
+  renderHistory();
+  setInterval(autoSaveFromExtension,700);
+});
 </script></body></html>
